@@ -72,7 +72,7 @@ sufe lclibrary teamlab list
 
 | 命令          | 说明                                             |
 | --------------- | -------------------------------------------------- |
-| `sufe doctor` | 检查 Playwright 环境是否就绪 |
+| `sufe doctor` | 检查运行环境：浏览器依赖、Cookie 配置存在性及有效性 |
 | `sufe install` | 安装所需的 Playwright Chromium 浏览器 |
 | `sufe auth` | 引导用户登录，获取并保存授权 Cookie |
 

@@ -16,8 +16,8 @@ description: SUFE CLI 的基础技能。当用户询问关于 sufe CLI 的安装
 
 | 指令 | 说明 |
 |---|---|
-| `sufe doctor` | **环境检查**：检查系统中是否已经正确安装了运行所需的 Playwright Chromium 浏览器。|
-| `sufe install` | **环境安装**：一键自动下载并安装缺失的 Playwright 浏览器依赖。 |
+| `sufe doctor` | **环境检查**：检查运行环境，包含 Playwright Chromium 浏览器是否已安装、Cookie 配置文件是否存在、以及 Cookie 是否仍有效（通过访问 portal 验证）。|
+| `sufe install` | **环境安装**：安装所需的 Playwright Chromium 浏览器。 |
 | `sufe auth` | **用户认证**：拉起浏览器窗口，引导用户手动完成登录，并将授权 Cookie 保存到本地。<br>⚠️ **注意**：您**不需要**在每次使用前都显式运行此命令。本地保存的 Cookie 具有一定的有效期。通常情况下，只需在首次使用、或是业务命令抛出“Cookie 损坏/已过期，请重新运行 `sufe auth`”的错误提示时，再执行此操作即可。 |
 | `sufe -v` | **版本查看**：输出当前 `sufe-cli` 的版本号。 |
 
@@ -30,6 +30,10 @@ description: SUFE CLI 的基础技能。当用户询问关于 sufe CLI 的安装
    ```bash
    sufe doctor
    ```
+   该命令会依次检查：
+   - Playwright Chromium 浏览器是否已安装
+   - Cookie 配置文件是否存在
+   - Cookie 是否仍有效（通过访问 portal 验证）
 2. **处理依赖缺失 (视需执行)**：
    如果 `doctor` 命令报告找不到 Chromium 浏览器（显示红色的 ❌ 错误提示），则需要运行安装命令：
    ```bash
