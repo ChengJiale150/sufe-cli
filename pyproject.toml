@@ -22,4 +22,4 @@ dependencies = [
 path = "src/sufe_cli/__init__.py"
 
 [project.scripts]
-sufe = "sufe_cli:main"
+sufe = "sufe_cli.cli:app"

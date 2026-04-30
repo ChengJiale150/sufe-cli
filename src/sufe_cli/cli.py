@@ -7,11 +7,11 @@ from playwright.sync_api import sync_playwright
 
 from . import __version__
 from .config import SufeCookies, save_cookies
-from .commands import lclibrary
+from .commands import app as commands_app
 
 app = typer.Typer(help="Sufe CLI - 与上海财经大学网页系统交互的命令行工具")
 
-app.add_typer(lclibrary.app, name="lclibrary")
+app.add_typer(commands_app, name="commands")
 
 def version_callback(value: bool):
     if value:
@@ -94,7 +94,9 @@ def auth():
                 raise typer.Exit(1)
             
             # 5. 校验并保存
-            cookie_model = SufeCookies(**target_cookies)
+            from .config import LclibraryCookies
+            lclibrary_cookies = LclibraryCookies(**target_cookies)
+            cookie_model = SufeCookies(lclibrary=lclibrary_cookies)
             save_cookies(cookie_model)
             typer.secho("✅ Cookie 获取并保存成功！", fg=typer.colors.GREEN)
             

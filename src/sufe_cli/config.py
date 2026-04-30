@@ -1,13 +1,15 @@
 import json
-import os
 from pathlib import Path
 from pydantic import BaseModel, Field
 
 COOKIE_FILE_PATH = Path.home() / ".sufe-cli" / "cookie.json"
 
-class SufeCookies(BaseModel):
+class LclibraryCookies(BaseModel):
     asp_net_session_id: str = Field(..., alias="ASP.NET_SessionId")
     sf_cookie_154: str = Field(..., alias="SF_cookie_154")
+
+class SufeCookies(BaseModel):
+    lclibrary: LclibraryCookies
 
 def get_cookie_path() -> Path:
     return COOKIE_FILE_PATH
