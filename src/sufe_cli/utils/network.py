@@ -6,6 +6,40 @@ from playwright.sync_api import sync_playwright
 from ..config import STATE_FILE_PATH, SufeCookies, LclibraryCookies, save_cookies, load_cookies
 
 
+def check_cookie_valid() -> tuple[bool, str]:
+    """检查本地 Cookie 是否存在且未过期。返回 (是否有效, 状态信息)。"""
+    cookies = load_cookies()
+    if not cookies:
+        return False, "Cookie 配置文件不存在或已损坏"
+
+    try:
+        req_cookies = {
+            "ASP.NET_SessionId": cookies.lclibrary.asp_net_session_id,
+            "SF_cookie_154": cookies.lclibrary.sf_cookie_154,
+        }
+        response = requests.get(
+            "https://portal.sufe.edu.cn/main.html",
+            cookies=req_cookies,
+            headers={
+                "User-Agent": (
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
+                )
+            },
+            allow_redirects=True,
+            timeout=10,
+        )
+    except requests.RequestException as e:
+        return False, f"网络请求异常：{e}"
+
+    if "login.sufe.edu.cn" in response.url:
+        return False, "Cookie 已过期（被重定向到登录页面）"
+    if response.status_code != 200:
+        return False, f"Portal 返回非预期状态码：{response.status_code}"
+
+    return True, "Cookie 配置有效"
+
+
 def get_default_headers() -> Dict[str, str]:
     """返回通用的网络请求伪装头"""
     return {

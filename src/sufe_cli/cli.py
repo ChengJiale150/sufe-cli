@@ -1,13 +1,14 @@
-import os
 import sys
 import subprocess
+
 import typer
-from typing import Optional
 from playwright.sync_api import sync_playwright
 
 from . import __version__
-from .config import SufeCookies, save_cookies, STATE_FILE_PATH
+from .config import SufeCookies, load_cookies, save_cookies, STATE_FILE_PATH
 from .commands.lclibrary import app as lclibrary_app
+from .utils.env import check_playwright
+from .utils.network import check_cookie_valid
 
 app = typer.Typer(help="Sufe CLI - 与上海财经大学网页系统交互的命令行工具")
 
@@ -22,7 +23,7 @@ def version_callback(value: bool):
 
 @app.callback()
 def main(
-    version: Optional[bool] = typer.Option(
+    version: bool | None = typer.Option(
         None, "--version", "-v", callback=version_callback, is_eager=True, help="显示版本信息"
     ),
 ):
@@ -34,26 +35,55 @@ def main(
 
 @app.command()
 def doctor():
-    """检查 Playwright 浏览器（Chromium）是否已安装"""
+    """检查运行环境：浏览器、Cookie 配置及有效性"""
+    has_error = False
+
+    # 1. Playwright 浏览器检查
     typer.echo("正在检查 Playwright 环境...")
-    try:
-        with sync_playwright() as p:
-            executable_path = p.chromium.executable_path
-            if os.path.exists(executable_path):
-                typer.secho("✅ Playwright Chromium 浏览器已安装，环境正常。", fg=typer.colors.GREEN)
-            else:
-                typer.secho(
-                    f"❌ 找不到 Playwright Chromium 浏览器（预期路径：{executable_path}）。", fg=typer.colors.RED
-                )
-                typer.secho("请运行 `sufe install` 进行安装。", fg=typer.colors.YELLOW)
-    except Exception as e:
-        typer.secho(f"检查失败：{e}", fg=typer.colors.RED, err=True)
+    ok, msg = check_playwright()
+    if ok:
+        typer.secho(f"✅ Playwright Chromium 浏览器已安装（{msg}）", fg=typer.colors.GREEN)
+    else:
+        typer.secho(f"❌ {msg}", fg=typer.colors.RED)
+        typer.secho("请运行 `sufe install` 进行安装。", fg=typer.colors.YELLOW)
+        has_error = True
+
+    # 2. Cookie 配置存在性检查
+    typer.echo("正在检查 Cookie 配置...")
+    cookies = load_cookies()
+    if cookies:
+        typer.secho("✅ Cookie 配置文件存在", fg=typer.colors.GREEN)
+    else:
+        typer.secho("❌ Cookie 配置文件不存在或已损坏", fg=typer.colors.RED)
+        typer.secho("请运行 `sufe auth` 完成登录并保存 Cookie。", fg=typer.colors.YELLOW)
+        has_error = True
+
+    # 3. Cookie 有效性检查
+    if cookies:
+        typer.echo("正在检查 Cookie 有效性...")
+        valid, info = check_cookie_valid()
+        if valid:
+            typer.secho(f"✅ {info}", fg=typer.colors.GREEN)
+        else:
+            typer.secho(f"❌ {info}", fg=typer.colors.RED)
+            typer.secho("请运行 `sufe auth` 重新登录。", fg=typer.colors.YELLOW)
+            has_error = True
+
+    if has_error:
         raise typer.Exit(1)
 
 
 @app.command()
-def install():
+def install(
+    force: bool = typer.Option(False, "--force", help="强制重新安装浏览器"),
+):
     """安装所需的 Playwright 浏览器（Chromium）"""
+    if not force:
+        ok, msg = check_playwright()
+        if ok:
+            typer.secho(f"✅ Playwright Chromium 浏览器已安装（{msg}），如需重装请使用 --force", fg=typer.colors.GREEN)
+            return
+
     typer.echo("正在安装 Playwright Chromium 浏览器，这可能需要一些时间...")
     try:
         subprocess.check_call([sys.executable, "-m", "playwright", "install", "chromium"])
