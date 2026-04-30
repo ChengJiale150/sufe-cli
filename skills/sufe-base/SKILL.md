@@ -3,7 +3,7 @@ name: sufe-base
 description: SUFE CLI 的基础技能。当用户询问关于 sufe CLI 的安装、环境检查、认证时，请务必触发此技能
 ---
 
-# Sufe CLI 基础技能 (Base Skill)
+# Sufe CLI 基础技能
 
 本技能提供 `sufe` 命令行工具的基础信息与核心工作流。`sufe` CLI 主要用于与上海财经大学 (SUFE) 的网页系统进行自动化交互。
 

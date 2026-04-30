@@ -13,4 +13,4 @@ pre-commit:
 pre-push:
   commands:
     build:
-      run: "uv run build"
+      run: "uv build"

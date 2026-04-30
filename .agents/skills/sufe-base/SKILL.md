@@ -1,0 +1,1 @@
+../../../skills/sufe-base/SKILL.md

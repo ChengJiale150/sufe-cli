@@ -50,12 +50,6 @@ check:
     uv run mypy .
     uv run pytest -ra -q
 
-# Run pre-commit checks using lefthook
-pre-commit:
-    @echo "Running pre-commit hooks..."
-    @lefthook run pre-commit
-    @echo "Pre-commit hooks passed!"
-
 # Update version and create git tag (type: patch, minor, major)
 update type:
     uv run scripts/update_version.py {{type}}
