@@ -1,12 +1,12 @@
 import typer
 import json
 from sufe_cli.utils.network import sufe_get
-from .utils import parse_data, validate_reservation
+from .utils import parse_data, validate_reservation, get_today_str
 
 app = typer.Typer(help="SUFE 小组研习室 相关命令")
 
 @app.command(name="list")
-def list_teamlab(date: str = typer.Argument(..., help="查询日期, 例如20260501")):
+def list_teamlab(date: str = typer.Argument(default_factory=get_today_str, help="查询日期, 例如20260501, 默认为今天")):
     """列出指定日期的小组研习室状态"""
     url = f"https://lclibrary.sufe.edu.cn/ClientWeb/pro/ajax/device.aspx?kind_id=100811029&date={date}&act=get_rsv_sta"
     

@@ -7,6 +7,11 @@ class StatusEnum(str, Enum):
     OCCUPIED = "已预约"
     PASSED = "过期"
 
+def get_today_str() -> str:
+    """获取今天日期的字符串格式 (YYYYMMDD, 东八区)"""
+    tz_bj = timezone(timedelta(hours=8))
+    return datetime.now(tz_bj).strftime("%Y%m%d")
+
 def parse_data(json_data: Dict[str, Any], target_date_str: str) -> Dict[str, Any]:
     """
     解析服务器返回的 JSON 数据并进行重组

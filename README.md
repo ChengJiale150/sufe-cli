@@ -31,7 +31,7 @@
 
 开始之前，请确保具备以下条件：
 
-- Python `>= 3.12`（建议使用 `uv` 管理）
+- Python `>= 3.12`
 - Node.js（`npm`/`npx`，用于安装 Agent Skills）
 
 ### 快速开始（人类用户）
@@ -40,7 +40,7 @@
 
 #### 安装
 
-**方式一 — 从 pip 安装（推荐）：**
+**方式一 — 从 pip 安装：**
 
 ```bash
 # 安装 CLI
@@ -50,21 +50,7 @@ pip install sufe-cli
 sufe install
 
 # 安装 CLI SKILL（针对 Agent）
-npx skills add https://github.com/ChengJiale150/sufe-cli
-```
-
-**方式二 — 源码开发（使用 uv）：**
-
-```bash
-git clone https://github.com/ChengJiale150/sufe-cli.git
-cd sufe-cli
-uv sync
-
-# 安装浏览器依赖
-uv run sufe install
-
-# 安装 CLI SKILL
-npx skills add https://github.com/ChengJiale150/sufe-cli
+npx skills add https://github.com/ChengJiale150/sufe-cli -y -g
 ```
 
 #### 配置与使用
@@ -73,8 +59,8 @@ npx skills add https://github.com/ChengJiale150/sufe-cli
 # 1. 登录授权（引导拉起浏览器完成统一身份认证）
 sufe auth
 
-# 2. 开始使用：查看特定日期的小组研讨室状态
-sufe lclibrary teamlab list 20260501
+# 2. 开始使用：查看今天的小组研讨室状态
+sufe lclibrary teamlab list
 ```
 
 ### 快速开始（AI Agent）
@@ -141,6 +127,10 @@ sufe lclibrary check
 
 # 根据姓名模糊搜索学号，用于预约时填充学号列表
 sufe lclibrary search "张三"
+
+# 查看今天的设施状态（不提供日期时默认为今天）
+sufe lclibrary teamlab list
+sufe lclibrary multimedia list
 
 # 查看指定日期（YYYYMMDD）的设施状态
 sufe lclibrary teamlab list 20260501

@@ -1,12 +1,12 @@
 import typer
 import json
 from sufe_cli.utils.network import sufe_get
-from .utils import parse_data, validate_reservation
+from .utils import parse_data, validate_reservation, get_today_str
 
 app = typer.Typer(help="SUFE 静音舱 相关命令")
 
 @app.command(name="list")
-def list_silentcabin(date: str = typer.Argument(..., help="查询日期, 例如20260430")):
+def list_silentcabin(date: str = typer.Argument(default_factory=get_today_str, help="查询日期, 例如20260430, 默认为今天")):
     """列出指定日期的静音舱状态"""
     url = f"https://lclibrary.sufe.edu.cn/ClientWeb/pro/ajax/device.aspx?kind_id=126386594&date={date}&act=get_rsv_sta"
     
