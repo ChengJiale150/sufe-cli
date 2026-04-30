@@ -1,8 +1,6 @@
 import typer
-import requests
 import json
-from sufe_cli.config import load_cookies
-from sufe_cli.utils import get_default_headers
+from sufe_cli.utils.network import sufe_get
 from .utils import parse_data, validate_reservation
 
 app = typer.Typer(help="SUFE 多媒体制作室 相关命令")
@@ -10,24 +8,13 @@ app = typer.Typer(help="SUFE 多媒体制作室 相关命令")
 @app.command(name="list")
 def list_multimedia(date: str = typer.Argument(..., help="查询日期, 例如20260502")):
     """列出指定日期的多媒体制作室状态"""
-    cookies = load_cookies()
-    if not cookies:
-        typer.secho("未找到 Cookie 文件或文件损坏，请先运行 `sufe auth`", fg=typer.colors.RED, err=True)
-        raise typer.Exit(1)
-        
-    req_cookies = {
-        "ASP.NET_SessionId": cookies.lclibrary.asp_net_session_id,
-        "SF_cookie_154": cookies.lclibrary.sf_cookie_154
-    }
-    
     url = f"https://lclibrary.sufe.edu.cn/ClientWeb/pro/ajax/device.aspx?kind_id=100811035&date={date}&act=get_rsv_sta"
     
+    response = sufe_get(url)
     try:
-        response = requests.get(url, cookies=req_cookies, headers=get_default_headers(), timeout=10)
-        response.raise_for_status()
         data = response.json()
     except Exception as e:
-        typer.secho(f"请求失败或解析 JSON 失败: {e}", fg=typer.colors.RED, err=True)
+        typer.secho(f"解析 JSON 失败: {e}", fg=typer.colors.RED, err=True)
         raise typer.Exit(1)
         
     if data.get("ret") != 1:
@@ -56,18 +43,7 @@ def reserve_multimedia(
         typer.secho(f"校验失败: {e}", fg=typer.colors.RED, err=True)
         raise typer.Exit(1)
         
-    # 2. 读取 Cookie
-    cookies = load_cookies()
-    if not cookies:
-        typer.secho("未找到 Cookie 文件或文件损坏，请先运行 `sufe auth`", fg=typer.colors.RED, err=True)
-        raise typer.Exit(1)
-        
-    req_cookies = {
-        "ASP.NET_SessionId": cookies.lclibrary.asp_net_session_id,
-        "SF_cookie_154": cookies.lclibrary.sf_cookie_154
-    }
-    
-    # 3. 准备请求参数
+    # 2. 准备请求参数
     params = {
         "dev_id": id,
         "lab_id": "115187637",
@@ -79,22 +55,15 @@ def reserve_multimedia(
     
     url = "https://lclibrary.sufe.edu.cn/ClientWeb/pro/ajax/reserve.aspx"
     
-    # 4. 发起预约请求
+    # 3. 发起预约请求
+    response = sufe_get(url, params=params)
     try:
-        response = requests.get(
-            url, 
-            params=params,
-            cookies=req_cookies, 
-            headers=get_default_headers(), 
-            timeout=30
-        )
-        response.raise_for_status()
         data = response.json()
     except Exception as e:
-        typer.secho(f"网络请求或解析失败: {e}", fg=typer.colors.RED, err=True)
+        typer.secho(f"解析失败: {e}", fg=typer.colors.RED, err=True)
         raise typer.Exit(1)
         
-    # 5. 分析返回结果
+    # 4. 分析返回结果
     if data.get("ret") == 1:
         typer.secho("✅ 预约成功！", fg=typer.colors.GREEN)
         if data.get("msg") and data.get("msg").lower() != "ok":

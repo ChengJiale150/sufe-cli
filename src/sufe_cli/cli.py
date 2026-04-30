@@ -6,7 +6,7 @@ from typing import Optional
 from playwright.sync_api import sync_playwright
 
 from . import __version__
-from .config import SufeCookies, save_cookies
+from .config import SufeCookies, save_cookies, STATE_FILE_PATH
 from .commands.lclibrary import app as lclibrary_app
 
 app = typer.Typer(help="Sufe CLI - 与上海财经大学网页系统交互的命令行工具")
@@ -98,6 +98,11 @@ def auth():
             lclibrary_cookies = LclibraryCookies(**target_cookies)
             cookie_model = SufeCookies(lclibrary=lclibrary_cookies)
             save_cookies(cookie_model)
+            
+            # 6. 保存完整的 Context State (包含 CAS Cookie)
+            STATE_FILE_PATH.parent.mkdir(parents=True, exist_ok=True)
+            context.storage_state(path=str(STATE_FILE_PATH))
+            
             typer.secho("✅ Cookie 获取并保存成功！", fg=typer.colors.GREEN)
             
             browser.close()
