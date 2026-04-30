@@ -7,12 +7,14 @@ from playwright.sync_api import sync_playwright
 from . import __version__
 from .config import SufeCookies, load_cookies, save_cookies, STATE_FILE_PATH
 from .commands.lclibrary import app as lclibrary_app
+from .commands.score import app as score_app
 from .utils.env import check_playwright
 from .utils.network import check_cookie_valid
 
 app = typer.Typer(help="Sufe CLI - 与上海财经大学网页系统交互的命令行工具")
 
 app.add_typer(lclibrary_app, name="lclibrary")
+app.add_typer(score_app, name="score")
 
 
 def version_callback(value: bool):

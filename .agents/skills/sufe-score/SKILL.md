@@ -1,0 +1,1 @@
+../../../skills/sufe-score/SKILL.md
