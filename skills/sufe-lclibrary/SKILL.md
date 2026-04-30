@@ -1,6 +1,6 @@
 ---
 name: sufe-lclibrary
-description: "SUFE IC 空间查看与预约技能。当用户提及查看或预约小组研讨室 (teamlab)、多媒体制作室 (multimedia) 或静音仓 (silentcabin) 时，请务必触发此技能。"
+description: SUFE IC 空间查看与预约技能。当用户提及查看或预约小组研讨室、多媒体制作室或静音仓时，请务必触发此技能
 ---
 
 # Sufe CLI - IC 空间 (LCLibrary) 技能

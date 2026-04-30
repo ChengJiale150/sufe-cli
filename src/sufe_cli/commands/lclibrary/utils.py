@@ -1,4 +1,4 @@
-﻿from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone, timedelta
 from enum import Enum
 from typing import Dict, Any, Tuple, List, Optional
 
@@ -17,15 +17,25 @@ def parse_data(json_data: Dict[str, Any], target_date_str: str) -> Dict[str, Any
     
     target_date = datetime.strptime(target_date_str, "%Y%m%d").date()
     
-    # 构建当日的 08:00 和 22:00
-    start_of_day = datetime(target_date.year, target_date.month, target_date.day, 8, 0, tzinfo=tz_bj)
-    end_of_day = datetime(target_date.year, target_date.month, target_date.day, 22, 0, tzinfo=tz_bj)
-    
     teamlabs = []
     
     for item in json_data.get("data", []):
         dev_id = item.get("devId")
         dev_name = item.get("devName")
+        
+        # 动态解析设施当天的开放起始和结束时间
+        open_start_str = item.get("openStart", "08:00")
+        open_end_str = item.get("openEnd", "22:00")
+        
+        try:
+            st_time = datetime.strptime(open_start_str, "%H:%M").time()
+            ed_time = datetime.strptime(open_end_str, "%H:%M").time()
+        except Exception:
+            st_time = datetime.strptime("08:00", "%H:%M").time()
+            ed_time = datetime.strptime("22:00", "%H:%M").time()
+            
+        start_of_day = datetime(target_date.year, target_date.month, target_date.day, st_time.hour, st_time.minute, tzinfo=tz_bj)
+        end_of_day = datetime(target_date.year, target_date.month, target_date.day, ed_time.hour, ed_time.minute, tzinfo=tz_bj)
         
         # 解析已经预约的（占据的）时间段
         occupied = []

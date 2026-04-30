@@ -7,11 +7,11 @@ from playwright.sync_api import sync_playwright
 
 from . import __version__
 from .config import SufeCookies, save_cookies
-from .commands import app as commands_app
+from .commands.lclibrary import app as lclibrary_app
 
 app = typer.Typer(help="Sufe CLI - 与上海财经大学网页系统交互的命令行工具")
 
-app.add_typer(commands_app, name="commands")
+app.add_typer(lclibrary_app, name="lclibrary")
 
 def version_callback(value: bool):
     if value:

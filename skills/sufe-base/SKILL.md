@@ -1,6 +1,6 @@
 ---
 name: sufe-base
-description: "SUFE CLI 的基础技能。当用户询问关于 sufe CLI 的安装、环境检查 (doctor)、认证 (auth) 或基础工作流时，请务必触发此技能。"
+description: SUFE CLI 的基础技能。当用户询问关于 sufe CLI 的安装、环境检查、认证时，请务必触发此技能
 ---
 
 # Sufe CLI 基础技能 (Base Skill)
