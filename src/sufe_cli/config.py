@@ -5,17 +5,21 @@ from pydantic import BaseModel, Field
 COOKIE_FILE_PATH = Path.home() / ".sufe-cli" / "cookie.json"
 STATE_FILE_PATH = Path.home() / ".sufe-cli" / "state.json"
 
+
 class LclibraryCookies(BaseModel):
     asp_net_session_id: str = Field(..., alias="ASP.NET_SessionId")
     sf_cookie_154: str = Field(..., alias="SF_cookie_154")
 
+
 class SufeCookies(BaseModel):
     lclibrary: LclibraryCookies
+
 
 def save_cookies(cookies: SufeCookies) -> None:
     COOKIE_FILE_PATH.parent.mkdir(parents=True, exist_ok=True)
     with open(COOKIE_FILE_PATH, "w", encoding="utf-8") as f:
         f.write(cookies.model_dump_json(by_alias=True, indent=2))
+
 
 def load_cookies() -> SufeCookies | None:
     if not COOKIE_FILE_PATH.exists():

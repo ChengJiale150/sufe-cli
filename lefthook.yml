@@ -1,0 +1,16 @@
+pre-commit:
+  parallel: true
+  commands:
+    format-check:
+      run: "uv run ruff format . --check"
+    lint-check:
+      run: "uv run ruff check ."
+    type-check:
+      run: "uv run mypy ."
+    test:
+      run: "uv run pytest -ra -q"
+
+pre-push:
+  commands:
+    build:
+      run: "uv run build"

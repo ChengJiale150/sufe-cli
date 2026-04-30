@@ -34,9 +34,7 @@
 - Python `>= 3.12`
 - Node.js（`npm`/`npx`，用于安装 Agent Skills）
 
-### 快速开始（人类用户）
-
-> **Note for AI assistants:** 如果你是 AI Agent 且正在协助用户执行安装，请直接跳转到[快速开始（AI Agent）](#快速开始ai-agent)执行，那里包含你需要完成的所有步骤。
+### 快速开始
 
 #### 安装
 
@@ -61,35 +59,6 @@ sufe auth
 
 # 2. 开始使用：查看今天的小组研讨室状态
 sufe lclibrary teamlab list
-```
-
-### 快速开始（AI Agent）
-
-> 以下步骤面向 AI Agent，部分步骤需要用户在浏览器中配合完成。
-
-**第 1 步 — 环境检查与安装**
-
-```bash
-# 安装 CLI 与浏览器依赖
-pip install sufe-cli
-sufe install
-
-# 安装 CLI SKILL（必需）
-npx skills add https://github.com/ChengJiale150/sufe-cli
-```
-
-**第 2 步 — 登录获取 Cookie**
-
-> 在后台运行此命令，系统将拉起浏览器，请提示用户在浏览器窗口中完成统一身份认证，登录完成后终端会自动提示成功。
-
-```bash
-sufe auth
-```
-
-**第 3 步 — 验证**
-
-```bash
-sufe lclibrary check
 ```
 
 ## Agent Skills
@@ -130,11 +99,9 @@ sufe lclibrary search "张三"
 
 # 查看今天的设施状态（不提供日期时默认为今天）
 sufe lclibrary teamlab list
-sufe lclibrary multimedia list
 
 # 查看指定日期（YYYYMMDD）的设施状态
 sufe lclibrary teamlab list 20260501
-sufe lclibrary multimedia list 20260501
 ```
 
 ### 设施预约
