@@ -7,6 +7,11 @@ on:
     tags:
       - 'v*'  # 匹配所有以 'v' 开头的标签，如 v1.0.0, v1.2.3
   workflow_dispatch:  # 允许手动触发
+    inputs:
+      version:
+        description: 'Version to publish (e.g., 0.1.0). Must match __init__.py version.'
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -50,12 +55,19 @@ jobs:
           ')
           echo "Package version: $VERSION"
           
-          # 获取 Git 标签版本（去掉 'v' 前缀）
-          TAG_VERSION=${GITHUB_REF#refs/tags/v}
-          echo "Tag version: $TAG_VERSION"
+          # 获取目标版本（手动触发优先使用 input，推送触发使用 Git tag）
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            TARGET_VERSION="${{ github.event.inputs.version }}"
+            # 如果输入了带有 v 的前缀，自动去掉
+            TARGET_VERSION=${TARGET_VERSION#v}
+            echo "Target version (from input): $TARGET_VERSION"
+          else
+            TARGET_VERSION=${GITHUB_REF#refs/tags/v}
+            echo "Target version (from tag): $TARGET_VERSION"
+          fi
           
-          if [ "$VERSION" != "$TAG_VERSION" ]; then
-            echo "Error: Package version ($VERSION) does not match tag version ($TAG_VERSION)"
+          if [ "$VERSION" != "$TARGET_VERSION" ]; then
+            echo "Error: Package version ($VERSION) does not match target version ($TARGET_VERSION)"
             exit 1
           fi
           echo "Version verification passed!"
@@ -86,7 +98,13 @@ jobs:
 
       - name: Verify and test package from PyPI
         run: |
-          VERSION=${GITHUB_REF#refs/tags/v}
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+            VERSION=${VERSION#v}
+          else
+            VERSION=${GITHUB_REF#refs/tags/v}
+          fi
+          
           echo "Waiting for version $VERSION to propagate on PyPI..."
           
           # 优雅的轮询等待机制 (最大重试 12 次，每次 10 秒)
