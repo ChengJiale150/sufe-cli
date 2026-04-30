@@ -27,10 +27,17 @@ init:
     @echo "Installing dependencies..."
     @just sync
 
-# Install CLI and Server in editable mode
+# Install CLI in editable mode and setup browser dependencies
 install:
-    @echo "Installing openopc-cli and openopc-server in editable mode..."
+    @echo "Installing sufe-cli in editable mode..."
     uv tool install --editable .
+    @echo "Verifying sufe installation..."
+    @if ! command -v sufe > /dev/null; then \
+        echo "❌ sufe command not found. Installation may have failed."; \
+        exit 1; \
+    fi
+    @echo "✅ sufe installed successfully. Installing Playwright browser..."
+    sufe install
 
 # Sync all dependencies in the workspace
 sync:
@@ -48,6 +55,10 @@ pre-commit:
     @echo "Running pre-commit hooks..."
     @lefthook run pre-commit
     @echo "Pre-commit hooks passed!"
+
+# Update version and create git tag (type: patch, minor, major)
+update type:
+    uv run scripts/update_version.py {{type}}
 
 # Clean all temporary files and caches across the workspace
 clean:
