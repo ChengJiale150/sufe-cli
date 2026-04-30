@@ -5,18 +5,36 @@ build-backend = "hatchling.build"
 [project]
 name = "sufe-cli"
 dynamic = ["version"]
-description = "Sufe CLI"
+description = "上海财经大学（SUFE）网页系统命令行交互工具"
 readme = "README.md"
+license = { text = "MIT" }
 authors = [
     { name = "jiale.cheng", email = "cjl3473383542@163.com" }
 ]
 requires-python = ">=3.12"
+keywords = ["sufe", "cli", "automation", "shufe", "playwright"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Utilities",
+]
 dependencies = [
     "playwright>=1.59.0",
     "pydantic>=2.12.5",
     "requests>=2.33.1",
     "typer>=0.24.1",
 ]
+
+[project.urls]
+Homepage = "https://github.com/ChengJiale150/sufe-cli"
+Repository = "https://github.com/ChengJiale150/sufe-cli.git"
+"Bug Tracker" = "https://github.com/ChengJiale150/sufe-cli/issues"
 
 [tool.hatch.version]
 path = "src/sufe_cli/__init__.py"
