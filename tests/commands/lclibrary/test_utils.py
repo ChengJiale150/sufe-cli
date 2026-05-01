@@ -2,6 +2,7 @@ import time_machine
 
 import pytest
 
+from sufe_cli.commands.lclibrary.teamlab import _merge_members
 from sufe_cli.commands.lclibrary.utils import (
     StatusEnum,
     get_today_str,
@@ -203,3 +204,25 @@ class TestParseData:
         assert len(periods) == 1
         assert periods[0]["period"] == "08:00 - 22:00"
         assert periods[0]["status"] == StatusEnum.FREE.value
+
+
+class TestMergeMembers:
+    def test_add_current_user_when_not_present(self) -> None:
+        result = _merge_members("2023001,2023002", "2023003")
+        assert result == ["2023001", "2023002", "2023003"]
+
+    def test_deduplicate_when_user_already_present(self) -> None:
+        result = _merge_members("2023001,2023003", "2023003")
+        assert result == ["2023001", "2023003"]
+
+    def test_empty_user_id_does_nothing(self) -> None:
+        result = _merge_members("2023001,2023002", "")
+        assert result == ["2023001", "2023002"]
+
+    def test_empty_members_only_returns_user(self) -> None:
+        result = _merge_members("", "2023001")
+        assert result == ["2023001"]
+
+    def test_handles_whitespace(self) -> None:
+        result = _merge_members(" 2023001 , 2023002 ", "2023003")
+        assert result == ["2023001", "2023002", "2023003"]

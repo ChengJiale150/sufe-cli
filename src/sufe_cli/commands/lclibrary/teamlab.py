@@ -1,9 +1,21 @@
-import typer
 import json
+
+import typer
+
+from sufe_cli.config import load_user_profile
 from sufe_cli.utils.network import sufe_get
-from .utils import parse_data, validate_reservation, get_today_str
+
+from .utils import get_today_str, parse_data, validate_reservation
 
 app = typer.Typer(help="SUFE 小组研习室 相关命令")
+
+
+def _merge_members(input_members: str, user_id: str) -> list[str]:
+    """将用户输入的成员列表与当前用户学号合并并去重"""
+    member_ids = [m.strip() for m in input_members.split(",") if m.strip()]
+    if user_id and user_id not in member_ids:
+        member_ids.append(user_id)
+    return member_ids
 
 
 @app.command(name="list")
@@ -35,14 +47,24 @@ def list_teamlab(date: str = typer.Argument(default_factory=get_today_str, help=
 def reserve_teamlab(
     id: str = typer.Argument(..., help="预约的研讨室 ID"),
     name: str = typer.Argument(..., help="预约名称"),
-    members: str = typer.Argument(..., help="预约的成员学号列表, 逗号分隔 (如: 2023110603,2023110604)"),
+    members: str = typer.Argument(
+        ..., help="其他成员学号列表, 逗号分隔 (如: 2023xxxxxx,2023yyyyyy)。系统将自动加入当前登录用户并去重"
+    ),
     start: str = typer.Argument(..., help="起始时间, 格式为 2026-05-01 10:40"),
     end: str = typer.Argument(..., help="结束时间, 格式为 2026-05-01 13:10"),
 ):
     """预约小组研习室"""
+    # 0. 加载当前用户信息并合并成员列表
+    profile = load_user_profile()
+    if profile is None or not profile.user_id:
+        typer.secho("未找到用户信息，请先运行 `sufe auth` 完成登录。", fg=typer.colors.RED, err=True)
+        raise typer.Exit(1)
+
+    merged_members = _merge_members(members, profile.user_id)
+
     # 1. 本地规则校验
     try:
-        start_dt, end_dt, member_list = validate_reservation(start=start, end=end, members=members)
+        start_dt, end_dt, member_list = validate_reservation(start=start, end=end, members=",".join(merged_members))
     except ValueError as e:
         typer.secho(f"校验失败: {e}", fg=typer.colors.RED, err=True)
         raise typer.Exit(1)
