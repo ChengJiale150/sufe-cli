@@ -10,17 +10,14 @@
 ## 为什么选 sufe-cli？
 
 - **为 Agent 原生设计** — [Skills](./skills/) 开箱即用，适配主流 AI 工具，Agent 无需额外适配即可在对话中完成空间预约
-- **无缝身份认证** — 内置 Playwright 自动化浏览器引导，一次登录，全局 Cookie 复用，告别繁琐的手动抓包
-- **覆盖核心场馆** — 包含图书馆空间（小组研讨室、多媒体制作室、静音仓）的状态查询与完整预约闭环
-- **安全可控** — Cookie 持久化保存在本地，调用前自动校验过期状态
-- **学业数据一键导出** — 教务成绩以 TSV 格式输出，直接导入表格工具或进行数据分析
-- **极速检索** — 聚合姓名与学号的模糊搜索，帮助你在组队预约时快速确认同伴信息
+- **无缝身份认证** — 内置 Playwright 浏览器认证，支持手动登录与配置账号密码自动登录
+- **覆盖核心场景** — 包含图书馆空间预约、成绩查询、校园账号管理等核心业务场景, 并在持续更新中
 
 ## 功能
 
 | 类别        | 能力                                         |
 | ------------- |--------------------------------------------|
-| 🔑 身份认证 | 检查浏览器环境、安装依赖、拉起浏览器自动化获取并持久化保存 Cookie |
+| 🔑 身份认证 | 检查浏览器环境、安装依赖、手动或自动登录并持久化保存门户状态 |
 | 📚 图书馆空间 | 查询与预约小组研讨室、多媒体制作室、静音仓（支持空闲状态查看、多人/单人预约） |
 | 📊 成绩查询 | 查看各学期成绩汇总、全部课程成绩明细，支持按学期筛选 |
 | 👤 校园账号 | 根据姓名模糊搜索匹配学号，辅助组队预约；查看当前登录用户信息 |
@@ -41,10 +38,26 @@
 **方式一 — 从 pip 安装：**
 
 ```bash
-# 安装 CLI
 pip install sufe-cli
 
-# 安装必要的 Playwright 浏览器依赖
+# 安装必要的 CLI 依赖
+sufe install
+
+# 安装 CLI SKILL（针对 Agent）
+npx skills add https://github.com/ChengJiale150/sufe-cli -y -g
+```
+
+**方式二 — 使用 uv 安装 (推荐)：**
+
+```bash
+# 安装uv
+pip install uv
+
+# 使用 uv tool 独立安装 sufe-cli 与 Playwright
+uv tool install sufe-cli
+uv tool install playwright
+
+# 安装必要的 CLI 依赖
 sufe install
 
 # 安装 CLI SKILL（针对 Agent）
@@ -54,13 +67,19 @@ npx skills add https://github.com/ChengJiale150/sufe-cli -y -g
 #### 配置与使用
 
 ```bash
-# 1. 登录授权（引导拉起浏览器完成统一身份认证）
+# 可选：设置自动登录模式（设置并保存账号密码）
+sufe config set --mode auto --username 2023xxxxxx --password your-password
+
+# 1. 登录授权（默认引导拉起浏览器完成统一身份认证）
 sufe auth
 
-# 2a. 查看今天的小组研讨室状态
+# 2. 查看自身基本信息
+sufe me
+
+# 3a. 查看今天的小组研讨室状态
 sufe lclibrary teamlab list
 
-# 2b. 查看各学期成绩汇总
+# 3b. 查看各学期成绩汇总
 sufe score summary
 ```
 
@@ -68,55 +87,33 @@ sufe score summary
 
 | Skill                           | 说明                                        |
 | --------------------------------- |-------------------------------------------|
-| `sufe-base`                   | 基础技能，包含环境检查、浏览器依赖安装和自动化用户认证（所有其他 skill 的前置依赖） |
+| `sufe-base`                   | 基础技能，包含环境检查、浏览器依赖安装和用户认证 |
 | `sufe-lclibrary`                 | IC 空间管理技能，包含空间状态查询、成员学号搜索和各类设施的自动预约逻辑                       |
-| `sufe-score`                    | 成绩查询技能，包含学期汇总、全部课程成绩明细、按学期筛选成绩（TSV 格式输出） |
+| `sufe-score`                    | 成绩查询技能，包含学期汇总、全部课程成绩明细、按学期筛选成绩 |
 
-## 认证
-
-| 命令          | 说明                                             |
-| --------------- | -------------------------------------------------- |
-| `sufe doctor` | 检查运行环境：浏览器依赖、Cookie 配置存在性及有效性 |
-| `sufe install` | 安装所需的 Playwright Chromium 浏览器 |
-| `sufe auth` | 引导用户登录，获取并保存授权 Cookie 及用户信息 |
-| `sufe me` | 显示当前登录用户的学号、姓名和学院信息 |
-
-```bash
-# 检查当前 Playwright 环境
-sufe doctor
-
-# 首次使用或 Cookie 失效时，执行自动认证获取 Cookie
-sufe auth
-
-# 查看当前登录用户信息
-sufe me
-```
 
 ## 核心命令与使用
 
 CLI 提供结构化的命令以操作 IC 空间 (LCLibrary) 与教务成绩查询：
 
-### 状态查询与搜索
+### 预约状态查询与搜索
 
 ```bash
-# 测试本地 Cookie 是否有效
-sufe lclibrary check
-
-# 根据姓名模糊搜索学号，用于预约时填充学号列表
-sufe lclibrary search "张三"
-
-# 查看今天的设施状态（不提供日期时默认为今天）
+# 查看今天小组研讨室的预约状态（不提供日期时默认为今天）
 sufe lclibrary teamlab list
 
-# 查看指定日期（YYYYMMDD）的设施状态
+# 查看指定日期（YYYYMMDD）的小组研讨室预约状态
 sufe lclibrary teamlab list 20260501
 ```
 
 ### 设施预约
 
-支持 `teamlab` (小组研讨室)、`multimedia` (多媒体制作室) 和 `silentcabin` (静音仓) 三种设施。时间参数必须是 10 分钟的整数倍。
+支持 `teamlab` (小组研讨室)、`multimedia` (多媒体制作室) 和 `silentcabin` (静音仓) 三种设施。
 
 ```bash
+# 根据姓名模糊搜索学号，用于预约时填充学号列表
+sufe lclibrary search "张三"
+
 # 预约小组研讨室 (需要提供成员学号和讨论主题，时长 1-4 小时)
 sufe lclibrary teamlab reserve 100811047 "讨论主题" "学号1,学号2" "2026-05-01 10:40" "2026-05-01 13:10"
 
@@ -144,7 +141,7 @@ sufe score list --semester "2025-2026 1"
 
 本工具可供 AI Agent 调用以自动化操作上海财经大学的相关业务系统，存在模型幻觉、执行不可控等固有风险；授权登录后，AI Agent 将以您的**真实用户身份**执行操作（例如发起真实的场地预约）。
 
-我们强烈建议您在对话框中仔细核对 Agent 给出的预约时间与场地信息后再允许其执行。请勿将包含本地 Cookie 的 `~/.sufe-cli/cookie.json` 文件泄露给他人。
+我们强烈建议您在对话框中仔细核对 Agent 给出的预约时间与场地信息后再允许其执行。请勿将包含本地登录状态的 `~/.sufe-cli/state.json`，或包含明文账号密码的 `~/.sufe-cli/auth.json` 文件泄露给他人。
 
 请您充分知悉全部使用风险，使用本工具即视为您自愿承担相关所有责任。
 

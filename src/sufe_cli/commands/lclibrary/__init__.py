@@ -1,6 +1,6 @@
 import typer
 import json
-from sufe_cli.utils.network import sufe_get
+from sufe_cli.client.http import sufe_get
 from .teamlab import app as teamlab_app
 from .silentcabin import app as silentcabin_app
 from .multimedia import app as multimedia_app
@@ -10,14 +10,6 @@ app = typer.Typer(help="SUFE Lclibrary 相关命令")
 app.add_typer(teamlab_app, name="teamlab")
 app.add_typer(silentcabin_app, name="silentcabin")
 app.add_typer(multimedia_app, name="multimedia")
-
-
-@app.command()
-def check():
-    """测试是否能成功访问 IC空间管理系统（携带 Cookie）"""
-    url = "https://lclibrary.sufe.edu.cn/ClientWeb/xcus/ic2/Default.aspx"
-    sufe_get(url, allow_redirects=True)
-    typer.secho("Cookie 有效！成功访问 IC空间管理系统。", fg=typer.colors.GREEN)
 
 
 @app.command(name="search")

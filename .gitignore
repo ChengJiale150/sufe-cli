@@ -11,3 +11,18 @@ wheels/
 
 # IDE
 .trae/
+.claude/
+.omx/
+.codex
+
+# Dev
+dev/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.playwright/
+.playwright-cli/
+
+# Test debug output
+tests/**/debug*.png
+tests/**/heatmap*.png

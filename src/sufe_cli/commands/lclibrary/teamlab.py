@@ -2,8 +2,9 @@ import json
 
 import typer
 
-from sufe_cli.config import load_user_profile
-from sufe_cli.utils.network import sufe_get
+from sufe_cli.client.browser import ensure_portal_state
+from sufe_cli.client.http import sufe_get
+from sufe_cli.client.portal import fetch_user_profile
 
 from .utils import get_today_str, parse_data, validate_reservation
 
@@ -55,7 +56,15 @@ def reserve_teamlab(
 ):
     """预约小组研习室"""
     # 0. 加载当前用户信息并合并成员列表
-    profile = load_user_profile()
+    try:
+        profile = fetch_user_profile()
+    except Exception:
+        profile = None
+    if (profile is None or not profile.user_id) and ensure_portal_state():
+        try:
+            profile = fetch_user_profile()
+        except Exception:
+            profile = None
     if profile is None or not profile.user_id:
         typer.secho("未找到用户信息，请先运行 `sufe auth` 完成登录。", fg=typer.colors.RED, err=True)
         raise typer.Exit(1)

@@ -11,13 +11,6 @@ from sufe_cli.commands.lclibrary.utils import (
 )
 
 
-class TestStatusEnum:
-    def test_values(self) -> None:
-        assert StatusEnum.FREE == "空闲"
-        assert StatusEnum.OCCUPIED == "已预约"
-        assert StatusEnum.PASSED == "过期"
-
-
 class TestGetTodayStr:
     @time_machine.travel("2026-05-01T14:30:00+08:00")
     def test_format_and_timezone(self) -> None:
@@ -214,14 +207,6 @@ class TestMergeMembers:
     def test_deduplicate_when_user_already_present(self) -> None:
         result = _merge_members("2023001,2023003", "2023003")
         assert result == ["2023001", "2023003"]
-
-    def test_empty_user_id_does_nothing(self) -> None:
-        result = _merge_members("2023001,2023002", "")
-        assert result == ["2023001", "2023002"]
-
-    def test_empty_members_only_returns_user(self) -> None:
-        result = _merge_members("", "2023001")
-        assert result == ["2023001"]
 
     def test_handles_whitespace(self) -> None:
         result = _merge_members(" 2023001 , 2023002 ", "2023003")

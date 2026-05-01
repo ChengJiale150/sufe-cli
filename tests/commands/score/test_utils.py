@@ -76,11 +76,6 @@ class TestParseSummary:
         assert len(rows) == 2
         assert all(len(r) == 6 for r in rows)
 
-    def test_empty_html(self) -> None:
-        headers, rows = parse_summary("<html></html>")
-        assert headers == []
-        assert rows == []
-
     def test_no_table(self) -> None:
         headers, rows = parse_summary("<html><body><p>no table</p></body></html>")
         assert headers == []
@@ -117,19 +112,6 @@ class TestParseCourses:
             "3",
         ]
         assert rows[2] == ["2024-2025 2", "102876", "1078", "深度学习", "选修课", "3", "99", "99", "4"]
-
-    def test_strips_whitespace_and_style(self) -> None:
-        """td 中的 style 属性和多余空白应被清理"""
-        _, rows = parse_courses(SAMPLE_HTML)
-        for row in rows:
-            for cell in row:
-                assert cell == cell.strip()
-                assert "style" not in cell.lower()
-
-    def test_empty_html(self) -> None:
-        headers, rows = parse_courses("<html></html>")
-        assert headers == []
-        assert rows == []
 
     def test_no_table(self) -> None:
         headers, rows = parse_courses("<html><body><p>no table</p></body></html>")

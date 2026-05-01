@@ -1,6 +1,6 @@
 import typer
 import json
-from sufe_cli.utils.network import sufe_get
+from sufe_cli.client.http import sufe_get
 from .utils import parse_data, validate_reservation, get_today_str
 
 app = typer.Typer(help="SUFE 多媒体制作室 相关命令")
