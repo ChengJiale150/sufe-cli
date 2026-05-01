@@ -8,11 +8,12 @@ from .client.auth_config import AuthMode, load_auth_config
 from .client.browser import authenticate_from_config, check_playwright, ensure_portal_state
 from .client.portal import fetch_user_profile
 from .client.state import load_portal_token
-from .commands import config_app, lclibrary_app, score_app
+from .commands import canvas_app, config_app, lclibrary_app, score_app
 from .config import STATE_FILE_PATH
 
 app = typer.Typer(help="Sufe CLI - 与上海财经大学网页系统交互的命令行工具")
 
+app.add_typer(canvas_app, name="canvas")
 app.add_typer(config_app, name="config")
 app.add_typer(lclibrary_app, name="lclibrary")
 app.add_typer(score_app, name="score")
