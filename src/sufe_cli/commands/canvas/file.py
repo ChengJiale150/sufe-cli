@@ -11,7 +11,7 @@ from .client import CANVAS_BASE, sufe_get_canvas
 
 app = typer.Typer(help="Canvas 文件相关命令")
 
-FileIdOption = Annotated[int, typer.Option("--id", help="文件 ID")]
+FileIdOption = Annotated[int, typer.Argument(help="文件 ID")]
 OutputOption = Annotated[str | None, typer.Option("--output", "-o", help="保存路径（文件或目录，默认为当前目录）")]
 
 

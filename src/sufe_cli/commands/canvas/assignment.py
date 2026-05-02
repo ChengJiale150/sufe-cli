@@ -16,8 +16,8 @@ from .utils import fetch_all_pages, html_to_markdown, utc_to_local
 
 app = typer.Typer(help="Canvas 作业相关命令")
 
-CourseIdOption = Annotated[int, typer.Option("--course-id", help="课程 ID")]
-AssignmentIdOption = Annotated[int, typer.Option("--assignment-id", help="作业 ID")]
+CourseIdOption = Annotated[int, typer.Argument(help="课程 ID")]
+AssignmentIdOption = Annotated[int, typer.Argument(help="作业 ID")]
 CanvasFilesOption = Annotated[list[Path], typer.Option("--file", help="要上传的文件，可多次指定")]
 CommentOption = Annotated[str | None, typer.Option("--comment", help="提交评论")]
 
