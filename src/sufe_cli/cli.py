@@ -62,26 +62,58 @@ def doctor() -> None:
         typer.secho("请运行 `sufe install` 进行安装。", fg=typer.colors.YELLOW)
         has_error = True
 
-    typer.echo("正在检查门户登录状态...")
-    if not STATE_FILE_PATH.exists():
-        typer.secho("未找到登录状态文件 state.json", fg=typer.colors.RED)
-        typer.secho("请运行 `sufe auth` 完成登录。", fg=typer.colors.YELLOW)
-        has_error = True
-    elif load_portal_token() is None:
-        typer.secho("state.json 中未找到门户 token", fg=typer.colors.RED)
-        typer.secho("请运行 `sufe auth` 重新登录。", fg=typer.colors.YELLOW)
-        has_error = True
-    else:
-        profile = None
+    def _check_auth() -> tuple[bool, bool]:
+        """检查认证状态。返回 (has_auth_error, is_retryable)"""
+        if not STATE_FILE_PATH.exists():
+            typer.secho("未找到登录状态文件 state.json", fg=typer.colors.RED)
+            return True, True
+
+        if load_portal_token() is None:
+            typer.secho("state.json 中未找到门户 token", fg=typer.colors.RED)
+            return True, True
+
         try:
             profile = fetch_user_profile()
         except Exception as e:
             typer.secho(f"门户状态检查失败：{e}", fg=typer.colors.RED)
-            has_error = True
+            return True, False
+
         if profile is not None and profile.user_id:
             typer.secho(f"门户登录状态有效：{profile.user_name} ({profile.user_id})", fg=typer.colors.GREEN)
-        elif not has_error:
-            typer.secho("门户登录状态无效，请运行 `sufe auth` 重新登录。", fg=typer.colors.RED)
+            return False, False
+
+        typer.secho("门户登录状态无效", fg=typer.colors.RED)
+        return True, True
+
+    typer.echo("正在检查门户登录状态...")
+    auth_error, retryable = _check_auth()
+
+    if auth_error:
+        if retryable:
+            config = load_auth_config()
+            if config.mode == AuthMode.AUTO:
+                typer.echo("检测到自动登录模式，正在尝试自动修复认证状态...")
+                try:
+                    ok, info = authenticate_from_config(config)
+                    if ok:
+                        typer.secho("自动修复成功，认证状态已恢复", fg=typer.colors.GREEN)
+                        # 重新验证
+                        auth_error2, _ = _check_auth()
+                        if auth_error2:
+                            has_error = True
+                    else:
+                        typer.secho(f"自动修复失败：{info}", fg=typer.colors.RED)
+                        typer.secho("请运行 `sufe auth` 重新登录。", fg=typer.colors.YELLOW)
+                        has_error = True
+                except ValueError as e:
+                    typer.secho(f"自动修复失败：{e}", fg=typer.colors.RED)
+                    typer.secho("请运行 `sufe auth` 重新登录。", fg=typer.colors.YELLOW)
+                    has_error = True
+            else:
+                typer.secho("请运行 `sufe auth` 完成登录。", fg=typer.colors.YELLOW)
+                has_error = True
+        else:
+            typer.secho("请运行 `sufe auth` 重新登录。", fg=typer.colors.YELLOW)
             has_error = True
 
     if has_error:
