@@ -1,6 +1,6 @@
 import pytest
 
-from sufe_cli.client.auto_login import _captcha_target_details
+from sufe_cli.client.auth.auto_login import _captcha_target_details
 
 
 def test_captcha_target_details_corrects_move_slider_range_ratio() -> None:

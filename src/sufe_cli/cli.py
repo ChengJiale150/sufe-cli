@@ -5,8 +5,8 @@ from typing import Annotated
 import typer
 
 from . import __version__
-from .client.auth_config import AuthMode, load_auth_config
-from .client.browser import authenticate_from_config, check_playwright
+from .config import AuthMode, load_auth_config
+from .client.auth.browser import authenticate_from_config, check_playwright
 from .client.portal import ensure_user_profile, fetch_user_profile
 from .client.state import load_portal_token
 from .commands import canvas_app, config_app, lclibrary_app, score_app

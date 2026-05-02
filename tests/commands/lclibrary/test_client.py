@@ -2,7 +2,7 @@ from typing import Any
 
 import pytest
 
-from sufe_cli.client import session
+from sufe_cli.client import network as session
 from sufe_cli.commands.lclibrary import client
 from sufe_cli.errors import AuthExpiredError
 from sufe_cli.runtime import CliContext

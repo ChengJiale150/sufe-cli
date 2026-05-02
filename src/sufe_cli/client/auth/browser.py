@@ -5,7 +5,7 @@ from playwright.sync_api import sync_playwright
 
 from sufe_cli.config import STATE_FILE_PATH
 
-from .auth_config import AuthConfig, AuthMode, load_auth_config, require_auto_credentials
+from ...config import AuthConfig, AuthMode, load_auth_config, require_auto_credentials
 from .auto_login import LOGIN_DOMAIN, LOGIN_URL, attempt_login
 
 PORTAL_URL = "https://portal.sufe.edu.cn/main.html"

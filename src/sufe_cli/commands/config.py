@@ -3,7 +3,7 @@ from typing import Annotated
 
 import typer
 
-from sufe_cli.client.auth_config import AuthConfig, AuthMode, load_auth_config, save_auth_config
+from sufe_cli.config import AuthConfig, AuthMode, load_auth_config, save_auth_config
 
 app = typer.Typer(help="SUFE CLI 配置命令")
 

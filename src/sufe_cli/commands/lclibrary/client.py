@@ -2,8 +2,13 @@ from typing import Any
 
 import requests
 
-from sufe_cli.client.http import get_default_headers
-from sufe_cli.client.session import DomainSessionSpec, read_domain_cookies, refresh_domain_cookies, request_with_refresh
+from sufe_cli.client.network import (
+    DomainSessionSpec,
+    get_default_headers,
+    read_domain_cookies,
+    refresh_domain_cookies,
+    request_with_refresh,
+)
 from sufe_cli.runtime import CliContext, get_cli_context
 
 LCLIBRARY_BASE = "https://lclibrary.sufe.edu.cn"

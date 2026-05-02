@@ -3,11 +3,12 @@ from typing import Any, Literal
 
 import requests
 
-from sufe_cli.client.http import DEFAULT_USER_AGENT, get_default_headers
-from sufe_cli.client.session import (
+from sufe_cli.client.network import (
+    DEFAULT_USER_AGENT,
     DomainSessionSpec,
     RETRY_REJECTED_MESSAGE,
     ensure_domain_cookies,
+    get_default_headers,
     read_domain_cookies,
     refresh_domain_cookies,
     refresh_domain_cookies_or_raise,

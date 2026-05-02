@@ -3,7 +3,7 @@ import requests
 
 from sufe_cli.errors import AuthExpiredError
 
-from .browser import ensure_portal_state
+from .auth.browser import ensure_portal_state
 from .state import load_portal_token
 
 USER_PROFILE_URL = "https://authx-service.sufe.edu.cn/personal/api/v1/personal/me/user"

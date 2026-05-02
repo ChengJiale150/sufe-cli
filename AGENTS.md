@@ -6,14 +6,57 @@
 
 ### 架构结构
 
-项目的核心源码均位于 `src/sufe_cli/` 目录下，采用按业务模块划分的架构设计：
+项目采用**三层源码架构 + 技能定义层**的组合设计：
 
-- `cli.py` 主命令入口，定义了基础的全局命令
-- `config.py` 配置管理模块，使用 Pydantic 对本地保存的 Cookie（位于 `~/.sufe-cli/cookie.json`）等信息进行校验与加载
-- `commands/` 子命令目录，目前包含 `lclibrary` 业务组
-  - `lclibrary/` 包含与 IC 空间管理系统相关的核心子命令组
-- `utils/` 底层网络请求等通用辅助工具
-  - `network.py` 提供获取默认请求伪装头的功能，确保请求能够绕过基础的安全检测
+```text
+src/sufe_cli/
+├── cli.py              # 主命令入口，注册全局命令与所有子命令组
+├── config.py           # 应用路径配置（~/.sufe-cli/ 下的状态与认证文件）
+├── runtime.py          # 全局 CLI 上下文（timeout、debug 等运行时参数）
+├── errors.py           # 自定义异常体系（SufeCliError 及其子类）
+├── cli_helpers.py      # CLI 错误边界装饰器，统一异常格式化与退出码
+├── client/             # 认证与网络层
+│   ├── auth/           # 浏览器认证流程
+│   ├── state.py        # 解析 Playwright storage_state，提取 Cookie 与 Token
+│   ├── network.py      # 浏览器风格请求头与通用域名会话管理
+│   └── portal.py       # 门户 Token 换取用户身份信息
+└── commands/           # 业务命令层
+    ├── config.py       # 查看/设置认证配置
+    ├── canvas/         # Canvas LMS 集成（课程、作业、文件）
+    ├── lclibrary/      # IC 空间管理系统（研讨室/多媒体/静音仓预约）
+    └── score/          # 教务成绩查询
+
+skills/                 # AI Agent 技能定义层
+├── sufe-base/          # 基础技能：环境检查、浏览器依赖安装、用户认证
+├── sufe-canvas/        # Canvas 技能：课程查看、作业查询与提交
+├── sufe-lclibrary/     # IC 空间技能：设施状态查询与预约
+└── sufe-score/         # 成绩查询技能：学期汇总与课程明细
+```
+
+**核心层**：提供 CLI 框架、配置管理、异常处理和运行时上下文。  
+**认证与网络层**：封装浏览器自动化、状态持久化和跨域 Cookie 自动刷新。  
+**业务命令层**：实现具体业务逻辑，每个子目录对应一个 `sufe <command>` 子命令。  
+**AI Agent 技能层**：位于 `skills/`，每个技能包含 `SKILL.md`，描述 Agent 可识别的命令集与工作流。新增业务命令时，需同步创建或更新对应的技能文档。
+
+## 全局约定
+
+### 认证状态与会话管理
+
+- 登录状态保存在 `~/.sufe-cli/state.json`，由 Playwright `storage_state` 生成
+- 业务模块**不应直接读取该文件**，应通过 `network.py` 的 `DomainSessionSpec` + `request_with_refresh` 获取自动刷新的 Cookie
+- 若需要调用新域名 API，需在 `network.py` 中定义对应的 `DomainSessionSpec`
+
+### 错误处理
+
+- 所有业务异常必须继承 `SufeCliError`，命令层函数使用 `@cli_error_boundary` 装饰
+- 错误信息通过抛出异常传递，**禁止在命令函数内直接调用 `typer.secho(..., fg=RED)` 打印错误后 return**
+- 调试信息使用 `runtime.debug_log()`，仅在 `--debug` 模式下输出
+
+### 网络请求模式
+
+- 调用外部 API 时，优先使用 `network.request_with_refresh()`，它会自动处理 Cookie 过期与静默刷新
+- 需要为每个目标域名定义 `DomainSessionSpec`（含 host、entry_url、cookie_names）
+- 判断登录超时应传入 `is_login_timeout` 回调（通常是检查响应中是否包含特定重定向或错误码）
 
 ## 开发指南
 
@@ -32,7 +75,7 @@
 ### 测试规范
 
 - **仅锁定关键语义**，不追求代码覆盖率或全面测试。
-- 测试目标是为核心业务规则（如校验逻辑、数据解析、状态转换）提供最小必要的回归保护。
+- 测试目标是为核心业务规则而不是网络请求或 CLI 命令本身。
 - 避免为 CLI 终端输出、纯数据传递层或第三方库行为编写冗余测试。
 
 ## 开发工作流
@@ -44,7 +87,7 @@
 3. **实现** —— 按源码风格完成修改，保持与现有代码库一致, 并同步更新 `skills/` 目录下对应的 `SKILL.md` 文档，确保技能描述与代码实现保持一致。
 4. **运行 `just check`** —— 执行格式化、静态检查、类型检查与测试套件，确保全部通过。
 
-> 禁止在 `just check` 未通过的情况下提交代码。
+> **严禁**在 `just check` 未通过的情况下提交代码。
 
 ## 常用开发指令
 

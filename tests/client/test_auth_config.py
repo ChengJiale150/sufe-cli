@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from sufe_cli.client.auth_config import (
+from sufe_cli.config import (
     AuthConfig,
     AuthMode,
     load_auth_config,

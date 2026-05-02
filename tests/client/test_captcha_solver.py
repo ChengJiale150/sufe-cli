@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 import pytest
 
-from sufe_cli.client.captcha_solver import find_gap_from_images, get_tracks, match_gap_from_images
+from sufe_cli.client.auth.captcha_solver import find_gap_from_images, get_tracks, match_gap_from_images
 
 DATA_DIR = Path(__file__).parent / "data"
 

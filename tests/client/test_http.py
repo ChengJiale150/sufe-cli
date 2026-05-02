@@ -1,4 +1,4 @@
-from sufe_cli.client.http import DEFAULT_USER_AGENT, get_default_headers
+from sufe_cli.client.network import DEFAULT_USER_AGENT, get_default_headers
 
 
 def test_default_headers_include_optional_browser_request_fields() -> None:

@@ -8,12 +8,33 @@ from sufe_cli.config import STATE_FILE_PATH
 from sufe_cli.errors import AuthExpiredError, RequestFailedError
 from sufe_cli.runtime import CliContext, debug_log, get_cli_context
 
-from .browser import recover_portal_state, refresh_domain_state
+from .auth.browser import recover_portal_state, refresh_domain_state
 from .state import extract_cookies_for_domain
+
+DEFAULT_USER_AGENT = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
+)
 
 AUTH_EXPIRED_MESSAGE = "登录状态已过期，请运行 `sufe auth` 重新登录"
 REFRESH_FAILED_MESSAGE = "静默刷新失败，请运行 `sufe auth` 重新登录"
 RETRY_REJECTED_MESSAGE = "重试依然被拒绝，请运行 `sufe auth` 重新登录"
+
+
+def get_default_headers(
+    *,
+    accept: str = "application/json, text/javascript, */*; q=0.01",
+    referer: str | None = None,
+    requested_with: str | None = None,
+) -> dict[str, str]:
+    headers = {
+        "User-Agent": DEFAULT_USER_AGENT,
+        "Accept": accept,
+    }
+    if referer is not None:
+        headers["Referer"] = referer
+    if requested_with is not None:
+        headers["X-Requested-With"] = requested_with
+    return headers
 
 
 @dataclass(frozen=True)

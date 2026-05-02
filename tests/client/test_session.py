@@ -3,7 +3,7 @@ from typing import Any
 import pytest
 import requests
 
-from sufe_cli.client import session
+from sufe_cli.client import network as session
 from sufe_cli.errors import AuthExpiredError
 
 
