@@ -8,10 +8,10 @@
 
 <img width="800" alt="Image" src="https://github.com/user-attachments/assets/59819763-cf93-40b5-a8b5-14b1b36429eb">
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square&logo=opensourceinitiative)](https://opensource.org/licenses/MIT)
-[![Python Version](https://img.shields.io/badge/python-%3E%3D3.12-blue.svg?style=flat-square&logo=python)](https://www.python.org/)
-[![PyPI Version](https://img.shields.io/pypi/v/sufe-cli.svg?style=flat-square&logo=pypi)](https://pypi.org/project/sufe-cli/)
-[![GitHub Stars](https://img.shields.io/github/stars/ChengJiale150/sufe-cli?style=flat-square&logo=github)](https://github.com/ChengJiale150/sufe-cli/stargazers)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge&logo=open-source-initiative&logoColor=white)](https://opensource.org/licenses/MIT)
+[![Python Version](https://img.shields.io/badge/python-%3E%3D3.12-blue?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![PyPI Version](https://img.shields.io/pypi/v/sufe-cli?style=for-the-badge&logo=pypi&logoColor=white)](https://pypi.org/project/sufe-cli/)
+[![GitHub Stars](https://img.shields.io/github/stars/ChengJiale150/sufe-cli?style=for-the-badge&logo=github&logoColor=white&color=181717)](https://github.com/ChengJiale150/sufe-cli/stargazers)
 
 </div>
 
