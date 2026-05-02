@@ -1,3 +1,5 @@
 from pathlib import Path
 
-STATE_FILE_PATH = Path.home() / ".sufe-cli" / "state.json"
+APP_DIR = Path.home() / ".sufe-cli"
+STATE_FILE_PATH = APP_DIR / "state.json"
+AUTH_FILE_PATH = APP_DIR / "auth.json"

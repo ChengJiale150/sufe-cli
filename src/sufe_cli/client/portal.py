@@ -1,6 +1,9 @@
 from pydantic import BaseModel
 import requests
 
+from sufe_cli.errors import AuthExpiredError
+
+from .browser import ensure_portal_state
 from .state import load_portal_token
 
 USER_PROFILE_URL = "https://authx-service.sufe.edu.cn/personal/api/v1/personal/me/user"
@@ -40,3 +43,20 @@ def fetch_user_profile(timeout: int = 30) -> UserProfile | None:
         user_name=attrs.get("userName", ""),
         organization_name=attrs.get("organizationName", ""),
     )
+
+
+def ensure_user_profile(timeout: int = 30) -> UserProfile:
+    try:
+        profile = fetch_user_profile(timeout=timeout)
+    except Exception:
+        profile = None
+
+    if (profile is None or not profile.user_id) and ensure_portal_state():
+        try:
+            profile = fetch_user_profile(timeout=timeout)
+        except Exception:
+            profile = None
+
+    if profile is None or not profile.user_id:
+        raise AuthExpiredError("未获取到用户信息，请先运行 `sufe auth` 完成登录。")
+    return profile

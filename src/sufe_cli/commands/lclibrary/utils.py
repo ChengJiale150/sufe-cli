@@ -1,6 +1,6 @@
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
-from typing import Dict, Any, Tuple, List, Optional
+from typing import Any
 
 TZ_BJ = timezone(timedelta(hours=8))
 
@@ -16,7 +16,7 @@ def get_today_str() -> str:
     return datetime.now(TZ_BJ).strftime("%Y%m%d")
 
 
-def parse_data(json_data: Dict[str, Any], target_date_str: str) -> Dict[str, Any]:
+def parse_data(json_data: dict[str, Any], target_date_str: str) -> dict[str, Any]:
     """
     解析服务器返回的 JSON 数据并进行重组
     target_date_str: 格式为 '20260501'
@@ -27,7 +27,13 @@ def parse_data(json_data: Dict[str, Any], target_date_str: str) -> Dict[str, Any
 
     teamlabs = []
 
-    for item in json_data.get("data", []):
+    data = json_data.get("data", [])
+    if not isinstance(data, list):
+        data = []
+
+    for item in data:
+        if not isinstance(item, dict):
+            continue
         dev_id = item.get("devId")
         dev_name = item.get("devName")
 
@@ -51,7 +57,12 @@ def parse_data(json_data: Dict[str, Any], target_date_str: str) -> Dict[str, Any
 
         # 解析已经预约的（占据的）时间段
         occupied = []
-        for ts in item.get("ts", []):
+        time_spans = item.get("ts", [])
+        if not isinstance(time_spans, list):
+            time_spans = []
+        for ts in time_spans:
+            if not isinstance(ts, dict):
+                continue
             try:
                 # API 返回格式：2026-05-01 10:50
                 st = datetime.strptime(ts["start"], "%Y-%m-%d %H:%M").replace(tzinfo=TZ_BJ)
@@ -122,8 +133,8 @@ def parse_data(json_data: Dict[str, Any], target_date_str: str) -> Dict[str, Any
 
 
 def validate_reservation(
-    start: str, end: str, members: Optional[str] = None, min_hours: float = 1.0, max_hours: int = 4
-) -> Tuple[datetime, datetime, List[str]]:
+    start: str, end: str, members: str | None = None, min_hours: float = 1.0, max_hours: int = 4
+) -> tuple[datetime, datetime, list[str]]:
     """
     校验预约规则
     返回解析后的 (start_dt, end_dt, member_list)

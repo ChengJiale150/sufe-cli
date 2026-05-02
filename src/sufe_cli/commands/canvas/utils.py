@@ -2,11 +2,12 @@ import re
 from datetime import datetime
 from typing import cast
 
-import typer
 from bs4 import BeautifulSoup, NavigableString, Tag
 from zoneinfo import ZoneInfo
 
-from sufe_cli.client.http import sufe_get_canvas
+from sufe_cli.errors import InvalidResponseError
+
+from .client import sufe_get_canvas
 
 
 def _extract_file_id(tag: Tag) -> str | None:
@@ -196,12 +197,10 @@ def fetch_all_pages(url: str, params: dict | None = None) -> list:
         try:
             data = response.json()
         except Exception as e:
-            typer.secho(f"解析 JSON 失败: {e}", fg=typer.colors.RED, err=True)
-            raise typer.Exit(1)
+            raise InvalidResponseError(f"解析 JSON 失败: {e}") from e
 
         if not isinstance(data, list):
-            typer.secho("API 返回的数据格式异常，不是预期的列表格式。", fg=typer.colors.RED, err=True)
-            raise typer.Exit(1)
+            raise InvalidResponseError("API 返回的数据格式异常，不是预期的列表格式。")
 
         all_data.extend(data)
 

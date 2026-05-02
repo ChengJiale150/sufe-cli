@@ -1,13 +1,18 @@
 import re
 from pathlib import Path
+from typing import Annotated
 
 import typer
 
-from sufe_cli.client.http import sufe_get_canvas
+from sufe_cli.cli_helpers import cli_error_boundary
+from sufe_cli.errors import UploadFailedError
 
-CANVAS_BASE = "https://canvas.shufe.edu.cn"
+from .client import CANVAS_BASE, sufe_get_canvas
 
 app = typer.Typer(help="Canvas 文件相关命令")
+
+FileIdOption = Annotated[int, typer.Option("--id", help="文件 ID")]
+OutputOption = Annotated[str | None, typer.Option("--output", "-o", help="保存路径（文件或目录，默认为当前目录）")]
 
 
 def _extract_filename(response) -> str:
@@ -20,9 +25,10 @@ def _extract_filename(response) -> str:
 
 
 @app.command(name="download")
+@cli_error_boundary
 def download_file(
-    file_id: int = typer.Option(..., "--id", help="文件 ID"),
-    output: str | None = typer.Option(None, "--output", "-o", help="保存路径（文件或目录，默认为当前目录）"),
+    file_id: FileIdOption,
+    output: OutputOption = None,
 ):
     """下载 Canvas 文件"""
     url = f"{CANVAS_BASE}/files/{file_id}/download?download_frd=1"
@@ -43,7 +49,6 @@ def download_file(
                 if chunk:
                     f.write(chunk)
     except Exception as e:
-        typer.secho(f"文件保存失败: {e}", fg=typer.colors.RED, err=True)
-        raise typer.Exit(1)
+        raise UploadFailedError(f"文件保存失败: {e}") from e
 
     typer.secho(f"文件已保存: {save_path}", fg=typer.colors.GREEN)

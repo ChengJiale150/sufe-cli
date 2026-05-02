@@ -4,7 +4,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict
 
-AUTH_FILE_PATH = Path.home() / ".sufe-cli" / "auth.json"
+from sufe_cli.config import AUTH_FILE_PATH
 
 
 class AuthMode(str, Enum):

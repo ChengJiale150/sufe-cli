@@ -1,20 +1,25 @@
 import json
-from typing import Literal
+from typing import Annotated, Literal
 
 import typer
 
-from sufe_cli.client.http import sufe_get_canvas
-from .utils import fetch_all_pages, utc_to_local
+from sufe_cli.cli_helpers import cli_error_boundary
+from sufe_cli.errors import InvalidResponseError
 
-CANVAS_BASE = "https://canvas.shufe.edu.cn"
+from .client import CANVAS_BASE, sufe_get_canvas
+from .utils import fetch_all_pages, utc_to_local
 
 SortField = Literal["course_name", "created_at"]
 SortOrder = Literal["asc", "desc"]
+SortFieldOption = Annotated[SortField, typer.Option("--sort", help="排序字段")]
+SortOrderOption = Annotated[SortOrder, typer.Option("--order", help="排序方向")]
+LimitOption = Annotated[int, typer.Option("--limit", min=1, help="返回结果数量限制")]
+OffsetOption = Annotated[int, typer.Option("--offset", min=0, help="结果偏移量")]
 
 app = typer.Typer(help="Canvas 课程相关命令")
 
 
-def _extract_course(course: dict) -> dict:
+def extract_course(course: dict) -> dict:
     """统一提取课程字段"""
     roles = [e.get("role") for e in course.get("enrollments", []) if e.get("role")]
     return {
@@ -26,7 +31,19 @@ def _extract_course(course: dict) -> dict:
     }
 
 
+def sort_and_slice_courses(
+    courses: list[dict], sort: SortField, order: SortOrder, limit: int, offset: int
+) -> list[dict]:
+    reverse = order == "desc"
+    if sort == "course_name":
+        courses.sort(key=lambda c: c.get("name") or "", reverse=reverse)
+    elif sort == "created_at":
+        courses.sort(key=lambda c: c.get("created_at") or "", reverse=reverse)
+    return courses[offset : offset + limit]
+
+
 @app.command(name="list")
+@cli_error_boundary
 def list_courses():
     """列出用户收藏的课程"""
     url = f"{CANVAS_BASE}/api/v1/users/self/favorites/courses"
@@ -35,23 +52,22 @@ def list_courses():
     try:
         data = response.json()
     except Exception as e:
-        typer.secho(f"解析 JSON 失败: {e}", fg=typer.colors.RED, err=True)
-        raise typer.Exit(1)
+        raise InvalidResponseError(f"解析 JSON 失败: {e}") from e
 
     if not isinstance(data, list):
-        typer.secho("API 返回的数据格式异常，不是预期的列表格式。", fg=typer.colors.RED, err=True)
-        raise typer.Exit(1)
+        raise InvalidResponseError("API 返回的数据格式异常，不是预期的列表格式。")
 
-    courses = [_extract_course(c) for c in data]
+    courses = [extract_course(c) for c in data]
     typer.echo(json.dumps(courses, ensure_ascii=False, indent=2))
 
 
 @app.command(name="all")
+@cli_error_boundary
 def list_all_courses(
-    sort: SortField = typer.Option("course_name", "--sort", help="排序字段"),
-    order: SortOrder = typer.Option("asc", "--order", help="排序方向"),
-    limit: int = typer.Option(20, "--limit", help="返回结果数量限制", min=1),
-    offset: int = typer.Option(0, "--offset", help="结果偏移量", min=0),
+    sort: SortFieldOption = "course_name",
+    order: SortOrderOption = "asc",
+    limit: LimitOption = 20,
+    offset: OffsetOption = 0,
 ):
     """列出用户参与的所有课程"""
     url = f"{CANVAS_BASE}/api/v1/courses"
@@ -62,15 +78,5 @@ def list_all_courses(
     }
 
     data = fetch_all_pages(url, params=params)
-    courses = [_extract_course(c) for c in data]
-
-    # 本地排序（Canvas API 排序不可靠）
-    reverse = order == "desc"
-    if sort == "course_name":
-        courses.sort(key=lambda c: c.get("name") or "", reverse=reverse)
-    elif sort == "created_at":
-        courses.sort(key=lambda c: c.get("created_at") or "", reverse=reverse)
-
-    # 截取结果
-    sliced = courses[offset : offset + limit]
-    typer.echo(json.dumps(sliced, ensure_ascii=False, indent=2))
+    courses = [extract_course(c) for c in data]
+    typer.echo(json.dumps(sort_and_slice_courses(courses, sort, order, limit, offset), ensure_ascii=False, indent=2))

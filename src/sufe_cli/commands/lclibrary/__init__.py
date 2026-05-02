@@ -1,9 +1,15 @@
-import typer
 import json
-from sufe_cli.client.http import sufe_get
-from .teamlab import app as teamlab_app
-from .silentcabin import app as silentcabin_app
+from typing import Annotated
+
+import typer
+
+from sufe_cli.cli_helpers import cli_error_boundary
+from sufe_cli.errors import InvalidResponseError
+
+from .client import LCLIBRARY_BASE, sufe_get
 from .multimedia import app as multimedia_app
+from .silentcabin import app as silentcabin_app
+from .teamlab import app as teamlab_app
 
 app = typer.Typer(help="SUFE Lclibrary 相关命令")
 
@@ -11,11 +17,14 @@ app.add_typer(teamlab_app, name="teamlab")
 app.add_typer(silentcabin_app, name="silentcabin")
 app.add_typer(multimedia_app, name="multimedia")
 
+SearchQueryArgument = Annotated[str, typer.Argument(help="搜索的姓名关键字，支持部分名称")]
+
 
 @app.command(name="search")
-def search_account(query: str = typer.Argument(..., help="搜索的姓名关键字，支持部分名称")):
+@cli_error_boundary
+def search_account(query: SearchQueryArgument):
     """根据姓名模糊搜索学号"""
-    url = "https://lclibrary.sufe.edu.cn/ClientWeb/pro/ajax/data/searchAccount.aspx"
+    url = f"{LCLIBRARY_BASE}/ClientWeb/pro/ajax/data/searchAccount.aspx"
     params = {"term": query}
 
     response = sufe_get(url, params=params)
@@ -23,12 +32,10 @@ def search_account(query: str = typer.Argument(..., help="搜索的姓名关键�
     try:
         data = response.json()
     except Exception as e:
-        typer.secho(f"解析 JSON 失败: {e}", fg=typer.colors.RED, err=True)
-        raise typer.Exit(1)
+        raise InvalidResponseError(f"解析 JSON 失败: {e}") from e
 
     if not isinstance(data, list):
-        typer.secho("API 返回的数据格式异常，不是预期的列表格式。", fg=typer.colors.RED, err=True)
-        raise typer.Exit(1)
+        raise InvalidResponseError("API 返回的数据格式异常，不是预期的列表格式。")
 
     labels = [item.get("label") for item in data if item.get("label")]
 

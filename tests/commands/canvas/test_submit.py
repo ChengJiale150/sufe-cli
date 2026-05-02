@@ -3,7 +3,8 @@ from pathlib import Path
 import pytest
 import typer
 
-from sufe_cli.commands.canvas.assignment import submit_assignment
+from sufe_cli.commands.canvas.assignment import _upload_single_file, submit_assignment
+from sufe_cli.errors import UploadFailedError
 
 
 class DummyResponse:
@@ -182,12 +183,12 @@ def test_submit_step1_error(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> 
         step1_error={"errors": [{"message": "文件大小超过限制"}]},
     )
 
-    with pytest.raises(typer.Exit):
-        submit_assignment(
+    with pytest.raises(UploadFailedError):
+        _upload_single_file(
             course_id=100,
             assignment_id=200,
-            files=[test_file],
-            comment=None,
+            file_path=test_file,
+            assignment_page="https://canvas.shufe.edu.cn/courses/100/assignments/200",
         )
 
 
@@ -198,10 +199,10 @@ def test_submit_step2_error(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> 
 
     _build_upload_mocks(monkeypatch, file_ids=[123], step2_status=500)
 
-    with pytest.raises(typer.Exit):
-        submit_assignment(
+    with pytest.raises(UploadFailedError):
+        _upload_single_file(
             course_id=100,
             assignment_id=200,
-            files=[test_file],
-            comment=None,
+            file_path=test_file,
+            assignment_page="https://canvas.shufe.edu.cn/courses/100/assignments/200",
         )

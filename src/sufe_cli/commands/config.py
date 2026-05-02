@@ -1,4 +1,5 @@
 import json
+from typing import Annotated
 
 import typer
 
@@ -9,9 +10,9 @@ app = typer.Typer(help="SUFE CLI 配置命令")
 
 @app.command(name="set")
 def set_config(
-    mode: AuthMode = typer.Option(..., "--mode", help="登录模式：manual 或 auto"),
-    username: str | None = typer.Option(None, "--username", "-u", help="自动登录学号"),
-    password: str | None = typer.Option(None, "--password", "-p", help="自动登录密码"),
+    mode: Annotated[AuthMode, typer.Option("--mode", help="登录模式：manual 或 auto")],
+    username: Annotated[str | None, typer.Option("--username", "-u", help="自动登录学号")] = None,
+    password: Annotated[str | None, typer.Option("--password", "-p", help="自动登录密码")] = None,
 ) -> None:
     """设置登录模式与自动登录账号密码。"""
     if mode == AuthMode.MANUAL:

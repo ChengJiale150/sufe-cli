@@ -1,15 +1,22 @@
 import subprocess
 import sys
+from typing import Annotated
 
 import typer
 
 from . import __version__
 from .client.auth_config import AuthMode, load_auth_config
-from .client.browser import authenticate_from_config, check_playwright, ensure_portal_state
-from .client.portal import fetch_user_profile
+from .client.browser import authenticate_from_config, check_playwright
+from .client.portal import ensure_user_profile, fetch_user_profile
 from .client.state import load_portal_token
 from .commands import canvas_app, config_app, lclibrary_app, score_app
 from .config import STATE_FILE_PATH
+from .errors import AuthExpiredError
+from .runtime import CliContext, set_cli_context
+
+DebugOption = Annotated[bool, typer.Option("--debug/--no-debug", help="显示调试诊断信息")]
+TimeoutOption = Annotated[int, typer.Option("--timeout", min=1, help="请求超时时间（秒）")]
+ForceOption = Annotated[bool, typer.Option("--force", help="强制重新安装浏览器")]
 
 app = typer.Typer(help="Sufe CLI - 与上海财经大学网页系统交互的命令行工具")
 
@@ -27,11 +34,18 @@ def version_callback(value: bool) -> None:
 
 @app.callback()
 def main(
-    version: bool | None = typer.Option(
-        None, "--version", "-v", callback=version_callback, is_eager=True, help="显示版本信息"
-    ),
+    ctx: typer.Context,
+    version: Annotated[
+        bool | None,
+        typer.Option("--version", "-v", callback=version_callback, is_eager=True, help="显示版本信息"),
+    ] = None,
+    timeout: TimeoutOption = 30,
+    debug: DebugOption = False,
 ) -> None:
     """Sufe CLI"""
+    cli_context = CliContext(timeout=timeout, debug=debug)
+    ctx.obj = cli_context
+    set_cli_context(cli_context)
 
 
 @app.command()
@@ -76,7 +90,7 @@ def doctor() -> None:
 
 @app.command()
 def install(
-    force: bool = typer.Option(False, "--force", help="强制重新安装浏览器"),
+    force: ForceOption = False,
 ) -> None:
     """安装所需的 Playwright 浏览器（Chromium）"""
     if not force:
@@ -120,18 +134,8 @@ def auth() -> None:
 def me() -> None:
     """显示当前登录用户的基本信息"""
     try:
-        profile = fetch_user_profile()
-    except Exception:
-        profile = None
-
-    if profile is None or not profile.user_id:
-        if ensure_portal_state():
-            try:
-                profile = fetch_user_profile()
-            except Exception:
-                profile = None
-
-    if profile is None or not profile.user_id:
+        profile = ensure_user_profile()
+    except AuthExpiredError:
         typer.secho(
             "未获取到用户信息，请先运行 `sufe auth` 完成登录。",
             fg=typer.colors.RED,

@@ -9,7 +9,6 @@ from .auth_config import AuthConfig, AuthMode, load_auth_config, require_auto_cr
 from .auto_login import LOGIN_DOMAIN, LOGIN_URL, attempt_login
 
 PORTAL_URL = "https://portal.sufe.edu.cn/main.html"
-LCLIBRARY_HOME_URL = "https://lclibrary.sufe.edu.cn/ClientWeb/xcus/ic2/Default.aspx"
 
 
 class BrowserAuthError(RuntimeError):
@@ -89,10 +88,6 @@ def refresh_domain_state(url: str, state_path: Path = STATE_FILE_PATH) -> bool:
             return False
         finally:
             browser.close()
-
-
-def refresh_lclibrary_state(state_path: Path = STATE_FILE_PATH) -> bool:
-    return refresh_domain_state(LCLIBRARY_HOME_URL, state_path=state_path)
 
 
 def ensure_portal_state(state_path: Path = STATE_FILE_PATH) -> bool:
