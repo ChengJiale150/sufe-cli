@@ -6,10 +6,12 @@
 
 <strong>一句话搞定 Canvas作业提交、成绩查询、研讨室预约 — 上财人自己的 AI 管家</strong>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python Version](https://img.shields.io/badge/python-%3E%3D3.12-blue.svg)](https://www.python.org/)
-[![PyPI Version](https://img.shields.io/pypi/v/sufe-cli.svg)](https://pypi.org/project/sufe-cli/)
-[![GitHub Stars](https://img.shields.io/github/stars/ChengJiale150/sufe-cli)](https://github.com/ChengJiale150/sufe-cli/stargazers)
+<img width="800" alt="Image" src="https://github.com/user-attachments/assets/59819763-cf93-40b5-a8b5-14b1b36429eb">
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square&logo=opensourceinitiative)](https://opensource.org/licenses/MIT)
+[![Python Version](https://img.shields.io/badge/python-%3E%3D3.12-blue.svg?style=flat-square&logo=python)](https://www.python.org/)
+[![PyPI Version](https://img.shields.io/pypi/v/sufe-cli.svg?style=flat-square&logo=pypi)](https://pypi.org/project/sufe-cli/)
+[![GitHub Stars](https://img.shields.io/github/stars/ChengJiale150/sufe-cli?style=flat-square&logo=github)](https://github.com/ChengJiale150/sufe-cli/stargazers)
 
 </div>
 
@@ -58,7 +60,7 @@
 
 <details>
 
-<summary>方式一 — 从 pip 安装</summary>
+<summary>方式一: 使用 pip 安装</summary>
 
 ```bash
 # 直接使用 pip 全局安装 sufe-cli
@@ -75,7 +77,7 @@ npx skills add https://github.com/ChengJiale150/sufe-cli -y -g
 
 <details open>
 
-<summary>方式二 — 使用 uv 安装（推荐）</summary>
+<summary>方式二: 使用 uv 安装（推荐）</summary>
 
 ```bash
 # 安装 uv
@@ -118,12 +120,14 @@ sufe me
 
 ## 🤖 Agent Skills
 
+我们提供以下 4 个 Skill 方便Agent来了解上财门户系统与Sufe CLI的使用:
+
 | Skill | 说明 |
 | --- | --- |
-| `sufe-base` | 基础域，包含环境检查、浏览器依赖安装和用户认证 |
-| `sufe-lclibrary` | IC 空间管理域，包含各类设施状态查询与预约以及成员学号搜索 |
-| `sufe-score` | 成绩查询域，包含学期汇总、全部课程成绩明细、按学期筛选成绩 |
-| `sufe-canvas` | Canvas 平台域，包含课程列表查看、课程作业查询及提交 |
+| [`sufe-base`](./skills/sufe-base/SKILL.md) | 基础域，包含环境检查、浏览器依赖安装和用户认证 |
+| [`sufe-lclibrary`](./skills/sufe-lclibrary/SKILL.md) | IC 空间管理域，包含各类设施状态查询与预约以及成员学号搜索 |
+| [`sufe-score`](./skills/sufe-score/SKILL.md) | 成绩查询域，包含学期汇总、全部课程成绩明细、按学期筛选成绩 |
+| [`sufe-canvas`](./skills/sufe-canvas/SKILL.md) | Canvas 平台域，包含课程列表查看、课程作业查询及提交 |
 
 ## 📋 核心指令示例
 
