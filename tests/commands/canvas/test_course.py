@@ -42,7 +42,8 @@ def test_list_courses_output_format(monkeypatch: pytest.MonkeyPatch, capsys: pyt
     assert course["id"] == 40442
     assert course["name"] == "深度学习（0875）"
     assert course["workflow_state"] == "available"
-    assert course["created_at"] == "2026-02-25T04:03:12Z"
+    # UTC 2026-02-25T04:03:12Z => 东八区 2026-02-25 12:03
+    assert course["created_at"] == "2026-02-25 12:03"
     assert course["roles"] == ["TaEnrollment"]
 
 

@@ -124,7 +124,7 @@ def refresh_canvas_cookies() -> bool:
 
 
 def sufe_get_canvas(
-    url: str, headers: dict[str, str] | None = None, timeout: int = 30, **kwargs: Any
+    url: str, headers: dict[str, str] | None = None, timeout: int = 30, stream: bool = False, **kwargs: Any
 ) -> requests.Response:
     def _do_request() -> requests.Response:
         cookies = get_canvas_cookies()
@@ -135,7 +135,7 @@ def sufe_get_canvas(
             cookies = get_canvas_cookies()
 
         actual_headers = headers if headers is not None else get_default_headers()
-        return requests.get(url, cookies=cookies, headers=actual_headers, timeout=timeout, **kwargs)
+        return requests.get(url, cookies=cookies, headers=actual_headers, timeout=timeout, stream=stream, **kwargs)
 
     try:
         response = _do_request()

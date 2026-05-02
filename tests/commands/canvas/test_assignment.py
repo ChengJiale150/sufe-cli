@@ -43,12 +43,17 @@ def test_merge_assignments_and_submissions(monkeypatch: pytest.MonkeyPatch, caps
     hw2 = result[0]
     assert hw2["id"] == 30662
     assert hw2["grade"] == "100"
-    assert hw2["submitted_at"] == "2025-10-12T09:47:00Z"
+    # UTC 2025-10-12T09:47:00Z => 东八区 2025-10-12 17:47
+    assert hw2["submitted_at"] == "2025-10-12 17:47"
+    # UTC 2025-11-02T14:00:00Z => 东八区 2025-11-02 22:00
+    assert hw2["due_at"] == "2025-11-02 22:00"
 
     hw3 = result[1]
     assert hw3["id"] == 30663
     assert hw3["grade"] is None
     assert hw3["submitted_at"] is None
+    # UTC 2025-11-09T14:00:00Z => 东八区 2025-11-09 22:00
+    assert hw3["due_at"] == "2025-11-09 22:00"
 
 
 def test_merge_with_missing_submissions(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
@@ -80,3 +85,4 @@ def test_merge_with_missing_submissions(monkeypatch: pytest.MonkeyPatch, capsys:
     assert len(result) == 1
     assert result[0]["grade"] is None
     assert result[0]["submitted_at"] is None
+    assert result[0]["due_at"] == "2025-11-02 22:00"

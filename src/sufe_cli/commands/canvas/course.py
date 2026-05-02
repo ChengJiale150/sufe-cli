@@ -4,7 +4,7 @@ from typing import Literal
 import typer
 
 from sufe_cli.client.http import sufe_get_canvas
-from .utils import fetch_all_pages
+from .utils import fetch_all_pages, utc_to_local
 
 CANVAS_BASE = "https://canvas.shufe.edu.cn"
 
@@ -21,7 +21,7 @@ def _extract_course(course: dict) -> dict:
         "id": course.get("id"),
         "name": course.get("name"),
         "workflow_state": course.get("workflow_state"),
-        "created_at": course.get("created_at"),
+        "created_at": utc_to_local(course.get("created_at")),
         "roles": roles,
     }
 
