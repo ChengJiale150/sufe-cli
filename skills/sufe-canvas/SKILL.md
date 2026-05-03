@@ -3,7 +3,7 @@ name: sufe-canvas
 description: SUFE Canvas 学习平台业务域(https://canvas.shufe.edu.cn/)。当用户询问课程与作业提交相关的信息时，请务必触发此技能
 ---
 
-**⚠️ 重要提示：在执行本技能中的任何命令前，请务必先参考并触发 `sufe-base` 技能**
+**⚠️ 重要提示：在执行本技能中的任何命令前，请务必先触发 `sufe-base` 中的业务前置校验工作流, 确保用户登陆状态正常**
 
 ## 核心概念
 
