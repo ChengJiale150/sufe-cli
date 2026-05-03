@@ -7,6 +7,10 @@ class SufeCliError(RuntimeError):
             self.exit_code = exit_code
 
 
+class AuthConfigMissingError(SufeCliError):
+    pass
+
+
 class AuthExpiredError(SufeCliError):
     pass
 

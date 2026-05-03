@@ -15,9 +15,9 @@ DEFAULT_USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
 )
 
-AUTH_EXPIRED_MESSAGE = "登录状态已过期，请运行 `sufe auth` 重新登录"
-REFRESH_FAILED_MESSAGE = "静默刷新失败，请运行 `sufe auth` 重新登录"
-RETRY_REJECTED_MESSAGE = "重试依然被拒绝，请运行 `sufe auth` 重新登录"
+AUTH_EXPIRED_MESSAGE = "认证配置缺失或登录状态已过期，请先运行 `sufe auth` 完成配置"
+REFRESH_FAILED_MESSAGE = "静默刷新失败，请先运行 `sufe auth` 完成配置"
+RETRY_REJECTED_MESSAGE = "重试依然被拒绝，请先运行 `sufe auth` 完成配置"
 
 
 def get_default_headers(

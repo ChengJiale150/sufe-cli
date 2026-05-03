@@ -12,6 +12,7 @@ def _setup_mocks(
     monkeypatch: pytest.MonkeyPatch,
     *,
     playwright_ok: bool = True,
+    auth_config_exists: bool = True,
     portal_state_valid: bool = False,
 ) -> None:
     """统一设置 doctor 命令所需的 mock"""
@@ -22,6 +23,11 @@ def _setup_mocks(
         return False, "Playwright Chromium 浏览器未安装"
 
     monkeypatch.setattr("sufe_cli.cli.check_playwright", mock_check_playwright)
+
+    def mock_auth_config_exists(path: Any = None) -> bool:
+        return auth_config_exists
+
+    monkeypatch.setattr("sufe_cli.cli.auth_config_exists", mock_auth_config_exists)
 
     def mock_ensure_portal_state(state_path: Any = None) -> bool:
         return portal_state_valid
@@ -41,7 +47,23 @@ def test_doctor_all_ok(monkeypatch: pytest.MonkeyPatch) -> None:
     result = runner.invoke(app, ["doctor"])
     assert result.exit_code == 0
     assert "Playwright Chromium 浏览器已安装" in result.output
+    assert "认证配置文件 auth.json 已存在" in result.output
     assert "门户登录状态有效" in result.output
+
+
+# ---------------------------------------------------------------------------
+# 认证配置缺失
+# ---------------------------------------------------------------------------
+
+
+def test_doctor_auth_config_missing(monkeypatch: pytest.MonkeyPatch) -> None:
+    """认证配置文件缺失"""
+    _setup_mocks(monkeypatch, auth_config_exists=False, portal_state_valid=True)
+
+    result = runner.invoke(app, ["doctor"])
+    assert result.exit_code == 1
+    assert "认证配置文件 auth.json 不存在" in result.output
+    assert "请运行 `sufe auth` 进行配置。" in result.output
 
 
 # ---------------------------------------------------------------------------

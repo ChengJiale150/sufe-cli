@@ -22,6 +22,11 @@ class AuthConfig(BaseModel):
     password: str | None = None
 
 
+def auth_config_exists(path: Path | None = None) -> bool:
+    actual_path = AUTH_FILE_PATH if path is None else path
+    return actual_path.exists()
+
+
 def load_auth_config(path: Path | None = None) -> AuthConfig:
     actual_path = AUTH_FILE_PATH if path is None else path
     if not actual_path.exists():
@@ -42,6 +47,6 @@ def save_auth_config(config: AuthConfig, path: Path | None = None) -> None:
 
 def require_auto_credentials(config: AuthConfig) -> tuple[str, str]:
     if config.mode != AuthMode.AUTO or not config.username or not config.password:
-        msg = "自动登录配置缺少学号或密码，请运行 `sufe config set --mode auto --username <username> --password <password>`"
+        msg = "自动登录配置缺少学号或密码，请运行 `sufe auth` 重新配置"
         raise ValueError(msg)
     return config.username, config.password

@@ -98,7 +98,7 @@ def ensure_portal_state(state_path: Path = STATE_FILE_PATH) -> bool:
 
 def fetch_page_with_state(url: str, state_path: Path = STATE_FILE_PATH) -> str:
     if not ensure_portal_state(state_path=state_path):
-        msg = "登录状态已过期，请运行 `sufe auth` 重新登录"
+        msg = "认证配置缺失或登录状态已过期，请先运行 `sufe auth` 完成配置"
         raise BrowserAuthError(msg)
 
     with sync_playwright() as p:
@@ -110,14 +110,14 @@ def fetch_page_with_state(url: str, state_path: Path = STATE_FILE_PATH) -> str:
             page.wait_for_load_state("networkidle")
             if LOGIN_DOMAIN in page.url:
                 if not recover_portal_state(state_path=state_path):
-                    msg = "登录状态已过期，请运行 `sufe auth` 重新登录"
+                    msg = "认证配置缺失或登录状态已过期，请先运行 `sufe auth` 完成配置"
                     raise BrowserAuthError(msg)
                 context = browser.new_context(storage_state=str(state_path))
                 page = context.new_page()
                 page.goto(url)
                 page.wait_for_load_state("networkidle")
                 if LOGIN_DOMAIN in page.url:
-                    msg = "登录状态已过期，请运行 `sufe auth` 重新登录"
+                    msg = "认证配置缺失或登录状态已过期，请先运行 `sufe auth` 完成配置"
                     raise BrowserAuthError(msg)
             context.storage_state(path=str(state_path))
             return page.content()
