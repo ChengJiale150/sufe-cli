@@ -5,10 +5,11 @@ from typing import Annotated
 import typer
 
 from . import __version__
-from .config import AuthConfig, AuthMode, auth_config_exists, load_auth_config, save_auth_config
-from .client.auth.browser import authenticate_from_config, check_playwright, ensure_portal_state
+from .client.auth.browser import check_playwright, ensure_portal_state
 from .client.portal import ensure_user_profile
 from .commands import canvas_app, lclibrary_app, score_app
+from .commands.auth import auth_command
+from .config import auth_config_exists
 from .errors import AuthExpiredError
 from .runtime import CliContext, set_cli_context
 
@@ -21,6 +22,30 @@ app = typer.Typer(help="Sufe CLI - 与上海财经大学网页系统交互的命
 app.add_typer(canvas_app, name="canvas")
 app.add_typer(lclibrary_app, name="lclibrary")
 app.add_typer(score_app, name="score")
+
+
+@app.command()
+def auth() -> None:
+    """配置认证信息并完成登录"""
+    auth_command()
+
+
+@app.command()
+def me() -> None:
+    """显示当前登录用户的基本信息"""
+    try:
+        profile = ensure_user_profile()
+    except AuthExpiredError:
+        typer.secho(
+            "未获取到用户信息，请先运行 `sufe auth` 完成登录。",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(1) from None
+
+    typer.echo(f"学号: {profile.user_id}")
+    typer.echo(f"姓名: {profile.user_name}")
+    typer.echo(f"学院: {profile.organization_name}")
 
 
 def version_callback(value: bool) -> None:
@@ -97,77 +122,3 @@ def install(
     except subprocess.CalledProcessError as e:
         typer.secho(f"安装失败：{e}", fg=typer.colors.RED, err=True)
         raise typer.Exit(1)
-
-
-@app.command()
-def auth(
-    interactive: Annotated[
-        bool,
-        typer.Option("--interactive", "-i", help="强制进入交互配置模式"),
-    ] = False,
-) -> None:
-    """配置认证信息并完成登录（首次使用会自动进入交互配置）"""
-    config_exists = auth_config_exists()
-
-    if not config_exists or interactive:
-        if not config_exists:
-            typer.echo("未检测到 auth.json，首次使用需要配置登录方式：")
-        else:
-            typer.echo("进入交互配置模式：")
-
-        mode_str = typer.prompt(
-            "请选择登录模式 [manual/auto]",
-            default="manual",
-            type=str,
-        )
-        try:
-            selected_mode = AuthMode(mode_str.lower())
-        except ValueError:
-            typer.secho(f"无效的模式：{mode_str}，请输入 manual 或 auto", fg=typer.colors.RED, err=True)
-            raise typer.Exit(1)
-
-        if selected_mode == AuthMode.AUTO:
-            username = typer.prompt("学号", type=str)
-            password = typer.prompt("密码", type=str, hide_input=True)
-            save_auth_config(AuthConfig(mode=AuthMode.AUTO, username=username, password=password))
-        else:
-            save_auth_config(AuthConfig(mode=AuthMode.MANUAL))
-
-        typer.secho("配置已保存。", fg=typer.colors.GREEN)
-
-    config = load_auth_config()
-
-    if config.mode == AuthMode.AUTO:
-        typer.echo("正在使用 auth.json 中的账号密码自动登录...")
-    else:
-        typer.echo("即将打开浏览器，请在弹出的窗口中完成登录...")
-
-    try:
-        ok, info = authenticate_from_config(config)
-    except ValueError as e:
-        typer.secho(str(e), fg=typer.colors.RED, err=True)
-        raise typer.Exit(1)
-
-    if not ok:
-        typer.secho(f"认证失败：{info}", fg=typer.colors.RED, err=True)
-        raise typer.Exit(1)
-
-    typer.secho("登录状态已保存到 state.json", fg=typer.colors.GREEN)
-
-
-@app.command()
-def me() -> None:
-    """显示当前登录用户的基本信息"""
-    try:
-        profile = ensure_user_profile()
-    except AuthExpiredError:
-        typer.secho(
-            "未获取到用户信息，请先运行 `sufe auth` 完成登录。",
-            fg=typer.colors.RED,
-            err=True,
-        )
-        raise typer.Exit(1)
-
-    typer.echo(f"学号: {profile.user_id}")
-    typer.echo(f"姓名: {profile.user_name}")
-    typer.echo(f"学院: {profile.organization_name}")

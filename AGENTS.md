@@ -21,6 +21,7 @@ src/sufe_cli/
 │   ├── network.py      # 浏览器风格请求头与通用域名会话管理
 │   └── portal.py       # 门户 Token 换取用户身份信息
 └── commands/           # 业务命令层
+    ├── auth.py         # 认证命令：交互式配置登录模式
     ├── config.py       # 查看/设置认证配置
     ├── canvas/         # Canvas LMS 集成（课程、作业、文件）
     ├── lclibrary/      # IC 空间管理系统（研讨室/多媒体/静音仓预约）
