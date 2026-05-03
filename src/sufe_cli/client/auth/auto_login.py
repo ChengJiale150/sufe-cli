@@ -11,6 +11,7 @@ from .captcha_solver import CaptchaMatch, get_tracks, match_gap_from_images
 
 LOGIN_URL = "https://login.sufe.edu.cn/login/"
 LOGIN_DOMAIN = "login.sufe.edu.cn"
+PORTAL_URL = "https://portal.sufe.edu.cn/main.html"
 SWITCH_SELECTOR = "#qrcode-box .qrcode-close"
 USERNAME_SELECTOR = "input[placeholder*='学号'], input[placeholder*='工号'], input#username, [role='textbox']"
 PASSWORD_SELECTOR = "input[type='password'], input#password"
@@ -264,6 +265,29 @@ def _wait_for_login_success(page: Page, *, timeout: int = 3500) -> bool:
     return True
 
 
+def _save_storage_state_with_portal(page, context, storage_state_path: str | None) -> None:
+    """登录成功后，确保 portal 页面加载完毕并保存 storage state。
+
+    会等待 portal 页面的 localStorage token 初始化完成，以捕获完整的认证状态。
+    """
+    if storage_state_path is None:
+        return
+
+    try:
+        if "portal.sufe.edu.cn" not in page.url:
+            page.goto(PORTAL_URL)
+        page.wait_for_load_state("networkidle", timeout=15000)
+        # 等待 portal 页面的 localStorage token 初始化（最多 10 秒）
+        page.wait_for_function(
+            "() => localStorage.getItem('token') !== null && localStorage.getItem('token') !== ''",
+            timeout=10000,
+        )
+    except Exception:
+        pass  # 即使等待失败也继续保存，至少能捕获 cookies
+
+    context.storage_state(path=storage_state_path)
+
+
 def _safe_click(locator: Locator, *, timeout: int = 1500) -> bool:
     try:
         if locator.is_visible():
@@ -398,8 +422,7 @@ def attempt_login(
             except Exception:
                 # 30 秒内验证码未出现，检查是否已直接跳转成功
                 if LOGIN_DOMAIN not in page.url:
-                    if storage_state_path is not None:
-                        context.storage_state(path=storage_state_path)
+                    _save_storage_state_with_portal(page, context, storage_state_path)
                     return True, page.url
                 return False, f"登录后未跳转且无验证码，当前页面: {page.url}"
 
@@ -471,8 +494,7 @@ def attempt_login(
                 _human_like_drag(page, slider, target_x)
 
                 if _wait_for_login_success(page):
-                    if storage_state_path is not None:
-                        context.storage_state(path=storage_state_path)
+                    _save_storage_state_with_portal(page, context, storage_state_path)
                     return True, page.url
 
                 if attempt < max_captcha_retries:
