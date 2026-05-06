@@ -177,9 +177,9 @@ def validate_reservation(
     if start_dt < now:
         raise ValueError("不能预约过去的时间")
 
-    # 提前7天限制
-    max_allow_date = now + timedelta(days=7)
-    if start_dt > max_allow_date:
+    # 提前7天限制（按日期计算，允许预约第7天）
+    max_allow_date = (now + timedelta(days=7)).date()
+    if start_dt.date() > max_allow_date:
         raise ValueError("最早只能提前 7 天预约")
 
     return start_dt, end_dt, member_list
