@@ -60,8 +60,8 @@ def test_get_target_dirs_with_claude(monkeypatch, tmp_path) -> None:
 
     dirs = skills_manager.get_target_dirs()
     assert len(dirs) == 2
-    assert str(dirs[0]).endswith(".agents/skills")
-    assert str(dirs[1]).endswith(".claude/skills")
+    assert dirs[0].parts[-2:] == (".agents", "skills")
+    assert dirs[1].parts[-2:] == (".claude", "skills")
 
 
 def test_get_target_dirs_without_claude(monkeypatch, tmp_path) -> None:
@@ -74,7 +74,7 @@ def test_get_target_dirs_without_claude(monkeypatch, tmp_path) -> None:
 
     dirs = skills_manager.get_target_dirs()
     assert len(dirs) == 1
-    assert str(dirs[0]).endswith(".agents/skills")
+    assert dirs[0].parts[-2:] == (".agents", "skills")
 
 
 # ---------------------------------------------------------------------------
