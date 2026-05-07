@@ -1,12 +1,11 @@
 import json
 import mimetypes
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Annotated, Any
 
 import requests
 import typer
-from zoneinfo import ZoneInfo
 
 from sufe_cli.cli_helpers import cli_error_boundary
 from sufe_cli.errors import InvalidResponseError, UploadFailedError
@@ -24,20 +23,21 @@ CommentOption = Annotated[str | None, typer.Option("--comment", help="提交评�
 
 def get_assignment_status(due_at: str | None, unlock_at: str | None, lock_at: str | None) -> str:
     """判定作业状态，优先级：已锁定 > 未解锁 > 已逾期 > 进行中"""
-    now = datetime.now(ZoneInfo("Asia/Shanghai"))
+    tz_bj = timezone(timedelta(hours=8))
+    now = datetime.now(tz_bj)
 
     if lock_at:
-        lock_dt = datetime.fromisoformat(lock_at.replace("Z", "+00:00")).astimezone(ZoneInfo("Asia/Shanghai"))
+        lock_dt = datetime.fromisoformat(lock_at.replace("Z", "+00:00")).astimezone(tz_bj)
         if now > lock_dt:
             return "已锁定"
 
     if unlock_at:
-        unlock_dt = datetime.fromisoformat(unlock_at.replace("Z", "+00:00")).astimezone(ZoneInfo("Asia/Shanghai"))
+        unlock_dt = datetime.fromisoformat(unlock_at.replace("Z", "+00:00")).astimezone(tz_bj)
         if now < unlock_dt:
             return "未解锁"
 
     if due_at:
-        due_dt = datetime.fromisoformat(due_at.replace("Z", "+00:00")).astimezone(ZoneInfo("Asia/Shanghai"))
+        due_dt = datetime.fromisoformat(due_at.replace("Z", "+00:00")).astimezone(tz_bj)
         if now > due_dt:
             return "已逾期"
 

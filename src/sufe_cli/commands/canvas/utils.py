@@ -1,9 +1,8 @@
 import re
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from typing import cast
 
 from bs4 import BeautifulSoup, NavigableString, Tag
-from zoneinfo import ZoneInfo
 
 from sufe_cli.errors import InvalidResponseError
 
@@ -171,7 +170,7 @@ def utc_to_local(utc_str: str | None) -> str | None:
     if utc_str is None:
         return None
     dt = datetime.fromisoformat(utc_str.replace("Z", "+00:00"))
-    local_dt = dt.astimezone(ZoneInfo("Asia/Shanghai"))
+    local_dt = dt.astimezone(timezone(timedelta(hours=8)))
     return local_dt.strftime("%Y-%m-%d %H:%M")
 
 
