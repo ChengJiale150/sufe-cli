@@ -45,6 +45,9 @@ dev = [
 [tool.hatch.version]
 path = "src/sufe_cli/__init__.py"
 
+[tool.hatch.build.targets.wheel.force-include]
+"skills" = "sufe_cli/skills"
+
 [project.scripts]
 sufe = "sufe_cli.cli:app"
 

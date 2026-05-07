@@ -25,3 +25,9 @@ class InvalidResponseError(SufeCliError):
 
 class UploadFailedError(SufeCliError):
     pass
+
+
+class SkillInstallError(SufeCliError):
+    """Skills 安装失败"""
+
+    pass

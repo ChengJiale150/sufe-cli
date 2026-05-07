@@ -60,24 +60,21 @@
 
 <details>
 
-<summary>方式一: 使用 pip 安装</summary>
+<summary>方式一: 使用 pip 全局安装</summary>
 
 ```bash
 # 直接使用 pip 全局安装 sufe-cli
 pip install sufe-cli
 
-# 安装必要的运行时依赖
+# 安装必要的运行时依赖与 Agent Skills
 sufe install
-
-# 安装 CLI SKILL（针对 Agent）
-npx skills add https://github.com/ChengJiale150/sufe-cli -y -g
 ```
 
 </details>
 
 <details open>
 
-<summary>方式二: 使用 uv 安装（推荐）</summary>
+<summary>方式二: 使用 uv 隔离安装（<b>推荐</b>）</summary>
 
 ```bash
 # 安装 uv
@@ -87,11 +84,8 @@ pip install uv
 uv tool install sufe-cli
 uv tool install playwright
 
-# 安装必要的运行时依赖
+# 安装必要的运行时依赖与 Agent Skills
 sufe install
-
-# 安装 CLI SKILL（针对 Agent）
-npx skills add https://github.com/ChengJiale150/sufe-cli -y -g
 ```
 
 </details>
