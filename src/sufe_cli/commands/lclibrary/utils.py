@@ -44,7 +44,7 @@ def parse_data(json_data: dict[str, Any], target_date_str: str) -> dict[str, Any
         try:
             st_time = datetime.strptime(open_start_str, "%H:%M").time()
             ed_time = datetime.strptime(open_end_str, "%H:%M").time()
-        except Exception:
+        except ValueError:
             st_time = datetime.strptime("08:00", "%H:%M").time()
             ed_time = datetime.strptime("22:00", "%H:%M").time()
 
@@ -74,7 +74,7 @@ def parse_data(json_data: dict[str, Any], target_date_str: str) -> dict[str, Any
 
                 if st < ed:
                     occupied.append((st, ed))
-            except Exception:
+            except (KeyError, ValueError):
                 continue
 
         # 按开始时间排序

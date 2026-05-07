@@ -48,13 +48,13 @@ def fetch_user_profile(timeout: int = 30) -> UserProfile | None:
 def ensure_user_profile(timeout: int = 30) -> UserProfile:
     try:
         profile = fetch_user_profile(timeout=timeout)
-    except Exception:
+    except requests.RequestException:
         profile = None
 
     if (profile is None or not profile.user_id) and ensure_portal_state():
         try:
             profile = fetch_user_profile(timeout=timeout)
-        except Exception:
+        except requests.RequestException:
             profile = None
 
     if profile is None or not profile.user_id:

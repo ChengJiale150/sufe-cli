@@ -11,6 +11,7 @@ from sufe_cli.config import (
     load_auth_config,
     save_auth_config,
 )
+from sufe_cli.errors import AuthConfigMissingError
 
 
 def _print_welcome_banner() -> None:
@@ -148,7 +149,7 @@ def auth_command() -> None:
 
     try:
         ok, info = authenticate_from_config(config)
-    except ValueError as e:
+    except AuthConfigMissingError as e:
         typer.secho(str(e), fg=typer.colors.RED, err=True)
         raise typer.Exit(1) from None
 

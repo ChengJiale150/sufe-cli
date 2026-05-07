@@ -4,15 +4,12 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 from sufe_cli.config import STATE_FILE_PATH
+from sufe_cli.errors import AuthConfigMissingError, BrowserAuthError
 
 from ...config import AuthConfig, AuthMode, load_auth_config, require_auto_credentials
 from .auto_login import LOGIN_DOMAIN, LOGIN_URL, attempt_login
 
 PORTAL_URL = "https://portal.sufe.edu.cn/main.html"
-
-
-class BrowserAuthError(RuntimeError):
-    pass
 
 
 def check_playwright() -> tuple[bool, str]:
@@ -22,7 +19,7 @@ def check_playwright() -> tuple[bool, str]:
             if os.path.exists(executable_path):
                 return True, executable_path
             return False, f"找不到 Playwright Chromium 浏览器（预期路径：{executable_path}）"
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001  # Playwright 可能抛出多种异常，统一捕获返回错误信息
         return False, f"检查失败：{e}"
 
 
@@ -50,7 +47,7 @@ def authenticate_manual(state_path: Path = STATE_FILE_PATH) -> tuple[bool, str]:
             try:
                 page.wait_for_url("**/portal.sufe.edu.cn/main.html*", timeout=300000)
                 page.wait_for_load_state("networkidle")
-            except Exception:
+            except Exception:  # noqa: BLE001  # Playwright 等待超时或页面错误，统一提示用户重试
                 return False, "等待登录完成超时或出现错误，请重试"
             context.storage_state(path=str(state_path))
             return True, page.url
@@ -64,7 +61,7 @@ def recover_portal_state(state_path: Path = STATE_FILE_PATH) -> bool:
         return False
     try:
         ok, _ = authenticate_auto(config, state_path=state_path)
-    except ValueError:
+    except AuthConfigMissingError:
         return False
     return ok
 
@@ -84,7 +81,7 @@ def refresh_domain_state(url: str, state_path: Path = STATE_FILE_PATH) -> bool:
                 return False
             context.storage_state(path=str(state_path))
             return True
-        except Exception:
+        except Exception:  # noqa: BLE001  # Playwright 页面操作异常，静默失败由上层重试
             return False
         finally:
             browser.close()

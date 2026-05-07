@@ -1,3 +1,4 @@
+import json
 import re
 from datetime import datetime, timedelta, timezone
 from typing import cast
@@ -195,7 +196,7 @@ def fetch_all_pages(url: str, params: dict | None = None) -> list:
 
         try:
             data = response.json()
-        except Exception as e:
+        except (json.JSONDecodeError, TypeError) as e:
             raise InvalidResponseError(f"解析 JSON 失败: {e}") from e
 
         if not isinstance(data, list):

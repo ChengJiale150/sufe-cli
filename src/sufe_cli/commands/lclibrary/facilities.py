@@ -27,7 +27,7 @@ def list_facility_status(spec: FacilitySpec, date: str) -> None:
 
     try:
         result = parse_data(data, date)
-    except Exception as e:
+    except (KeyError, TypeError, ValueError) as e:
         raise InvalidResponseError(f"处理数据时出错: {e}") from e
 
     typer.echo(json.dumps(result, ensure_ascii=False, indent=2))
@@ -90,7 +90,7 @@ def submit_reservation(params: dict[str, str]) -> None:
 def _read_json_response(response, failure_message: str) -> dict:
     try:
         data = response.json()
-    except Exception as e:
+    except (json.JSONDecodeError, TypeError) as e:
         raise InvalidResponseError(f"{failure_message}: {e}") from e
 
     if not isinstance(data, dict):

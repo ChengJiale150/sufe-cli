@@ -31,3 +31,9 @@ class SkillInstallError(SufeCliError):
     """Skills 安装失败"""
 
     pass
+
+
+class BrowserAuthError(SufeCliError):
+    """浏览器认证失败"""
+
+    pass

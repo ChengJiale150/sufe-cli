@@ -2,7 +2,9 @@ import json
 from enum import Enum
 from pathlib import Path
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, ValidationError
+
+from .errors import AuthConfigMissingError
 
 APP_DIR = Path.home() / ".sufe-cli"
 STATE_FILE_PATH = APP_DIR / "state.json"
@@ -35,7 +37,7 @@ def load_auth_config(path: Path | None = None) -> AuthConfig:
     try:
         data = json.loads(actual_path.read_text(encoding="utf-8"))
         return AuthConfig.model_validate(data)
-    except Exception:
+    except (json.JSONDecodeError, ValidationError):
         return AuthConfig()
 
 
@@ -48,5 +50,5 @@ def save_auth_config(config: AuthConfig, path: Path | None = None) -> None:
 def require_auto_credentials(config: AuthConfig) -> tuple[str, str]:
     if config.mode != AuthMode.AUTO or not config.username or not config.password:
         msg = "自动登录配置缺少学号或密码，请运行 `sufe auth` 重新配置"
-        raise ValueError(msg)
+        raise AuthConfigMissingError(msg)
     return config.username, config.password

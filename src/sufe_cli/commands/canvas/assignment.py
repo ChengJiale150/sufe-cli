@@ -112,7 +112,7 @@ def format_submission_result(submission: dict, uploaded_files: list[dict], comme
 def read_json_object(response, failure_message: str) -> dict[str, Any]:
     try:
         data = response.json()
-    except Exception as e:
+    except (json.JSONDecodeError, TypeError) as e:
         raise InvalidResponseError(f"{failure_message}: {e}") from e
     if not isinstance(data, dict):
         raise InvalidResponseError("API 返回的数据格式异常，不是预期的对象格式。")

@@ -5,13 +5,7 @@ name: Publish to PyPI
 on:
   push:
     tags:
-      - 'v*'  # 匹配所有以 'v' 开头的标签，如 v1.0.0, v1.2.3
-  workflow_dispatch:  # 允许手动触发
-    inputs:
-      version:
-        description: 'Version to publish (e.g., 0.1.0). Must match __init__.py version.'
-        required: true
-        type: string
+      - 'v*'  # 匹配所有以 v 开头的标签，如 v1.0.0, v1.2.3
 
 permissions:
   contents: read
@@ -20,6 +14,7 @@ jobs:
   # 构建和发布任务
   build-and-publish:
     name: Build and publish Python distribution to PyPI
+    if: github.event.base_ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -48,26 +43,19 @@ jobs:
           VERSION=$(python -c '
           import re
           with open("src/sufe_cli/__init__.py", "r") as f:
-              if match := re.search(r"__version__\s*=\s*[\"'"'"']([^\"'"'"']+)[\"'"'"']", f.read()):
+              if match := re.search(r"__version__\s*=\s*[\"'\''']([^\"'\''']+)[\"'\''']", f.read()):
                   print(match.group(1))
               else:
                   raise ValueError("Version not found in __init__.py")
           ')
           echo "Package version: $VERSION"
-          
-          # 获取目标版本（手动触发优先使用 input，推送触发使用 Git tag）
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            TARGET_VERSION="${{ github.event.inputs.version }}"
-            # 如果输入了带有 v 的前缀，自动去掉
-            TARGET_VERSION=${TARGET_VERSION#v}
-            echo "Target version (from input): $TARGET_VERSION"
-          else
-            TARGET_VERSION=${GITHUB_REF#refs/tags/v}
-            echo "Target version (from tag): $TARGET_VERSION"
-          fi
-          
-          if [ "$VERSION" != "$TARGET_VERSION" ]; then
-            echo "Error: Package version ($VERSION) does not match target version ($TARGET_VERSION)"
+
+          # 从 Git tag 提取目标版本
+          TAG_VERSION=${GITHUB_REF#refs/tags/v}
+          echo "Tag version: $TAG_VERSION"
+
+          if [ "$VERSION" != "$TAG_VERSION" ]; then
+            echo "Error: Package version ($VERSION) does not match tag version ($TAG_VERSION)"
             exit 1
           fi
           echo "Version verification passed!"
@@ -76,6 +64,13 @@ jobs:
         run: |
           uv build
           ls -la dist/
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ github.ref_name }}
+          path: dist/
+          retention-days: 7
 
       - name: Check package
         run: uv run --with twine twine check dist/*
@@ -98,30 +93,25 @@ jobs:
 
       - name: Verify and test package from PyPI
         run: |
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            VERSION="${{ github.event.inputs.version }}"
-            VERSION=${VERSION#v}
-          else
-            VERSION=${GITHUB_REF#refs/tags/v}
-          fi
-          
+          VERSION=${GITHUB_REF#refs/tags/v}
+
           echo "Waiting for version $VERSION to propagate on PyPI..."
-          
+
           # 优雅的轮询等待机制 (最大重试 12 次，每次 10 秒)
           MAX_RETRIES=12
           for i in $(seq 1 $MAX_RETRIES); do
             echo "Attempt $i/$MAX_RETRIES..."
-            
+
             # 使用 uv tool install 测试全局 CLI 安装，--no-cache 确保拉取 PyPI 最新状态
             if uv --no-cache tool install --force "sufe-cli==$VERSION"; then
-              echo "✅ Package successfully published and installed!"
-              
+              echo "Package successfully published and installed!"
+
               # 简单验证 CLI 连通性
               sufe --help
               exit 0
             fi
             sleep 10
           done
-          
-          echo "❌ Package not found on PyPI after waiting."
+
+          echo "Package not found on PyPI after waiting."
           exit 1

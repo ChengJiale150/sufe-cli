@@ -14,7 +14,7 @@ def load_storage_state(path: Path | None = None) -> dict[str, Any] | None:
         return None
     try:
         data = json.loads(actual_path.read_text(encoding="utf-8"))
-    except Exception:
+    except json.JSONDecodeError:
         return None
     return data if isinstance(data, dict) else None
 

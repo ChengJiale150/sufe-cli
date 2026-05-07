@@ -10,6 +10,7 @@ from sufe_cli.config import (
     require_auto_credentials,
     save_auth_config,
 )
+from sufe_cli.errors import AuthConfigMissingError
 
 
 def test_missing_auth_config_defaults_to_manual(tmp_path) -> None:
@@ -39,5 +40,5 @@ def test_save_and_load_auto_config_plaintext(tmp_path) -> None:
 
 
 def test_require_auto_credentials_rejects_incomplete_auto_config() -> None:
-    with pytest.raises(ValueError, match="自动登录配置缺少"):
+    with pytest.raises(AuthConfigMissingError, match="自动登录配置缺少"):
         require_auto_credentials(AuthConfig(mode=AuthMode.AUTO, username="20230001"))

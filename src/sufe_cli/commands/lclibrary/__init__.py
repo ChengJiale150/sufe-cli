@@ -31,7 +31,7 @@ def search_account(query: SearchQueryArgument):
 
     try:
         data = response.json()
-    except Exception as e:
+    except (json.JSONDecodeError, TypeError) as e:
         raise InvalidResponseError(f"解析 JSON 失败: {e}") from e
 
     if not isinstance(data, list):

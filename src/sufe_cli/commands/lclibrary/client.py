@@ -1,3 +1,4 @@
+import json
 from typing import Any
 
 import requests
@@ -41,7 +42,7 @@ def is_login_timeout(response: requests.Response) -> bool:
         return True
     try:
         data = response.json()
-    except Exception:
+    except (json.JSONDecodeError, TypeError):
         return False
     return isinstance(data, dict) and "登录超时" in str(data.get("msg", ""))
 

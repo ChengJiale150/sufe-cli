@@ -23,6 +23,7 @@
 - [🤖 Agent Skills](#-agent-skills)
 - [📋 核心指令示例](#-核心指令示例)
 - [⚠️ 安全与风险提示（使用前必读）](#️-安全与风险提示使用前必读)
+- [🤝 贡献指南](#-贡献指南)
 - [📝 许可证](#-许可证)
 
 ## 🎯 为什么需要 sufe-cli？
@@ -178,6 +179,14 @@ sufe canvas assignment submit <课程ID> <作业ID> --file <文件路径>
 > 请勿将包含本地登录状态的 `~/.sufe-cli/state.json` 或包含账号密码的 `~/.sufe-cli/auth.json` 文件泄露给他人。
 >
 > 请您充分知悉全部使用风险，使用本工具即视为您**自愿**承担相关所有责任。
+
+## 🤝 贡献指南
+
+我们欢迎所有形式的贡献，无论是 Bug 修复、功能增强还是文档改进。
+
+参与开发前，请阅读 [`CONTRIBUTING.md`](./CONTRIBUTING.md) 了解开发环境搭建和工作流程。核心开发规范详见 [`AGENTS.md`](./AGENTS.md)。
+
+如有问题或建议，欢迎通过 [GitHub Issues](https://github.com/ChengJiale150/sufe-cli/issues) 反馈。
 
 ## 📝 许可证
 

@@ -6,11 +6,12 @@ import typer
 
 from . import __version__
 from .client.auth.browser import check_playwright, ensure_portal_state
+from .cli_helpers import cli_error_boundary
 from .client.portal import ensure_user_profile
 from .commands import canvas_app, lclibrary_app, score_app
 from .commands.auth import auth_command
 from .config import auth_config_exists
-from .errors import AuthExpiredError, SkillInstallError
+from .errors import SkillInstallError
 from .runtime import CliContext, set_cli_context
 from . import skills_manager
 
@@ -31,18 +32,10 @@ def auth() -> None:
 
 
 @app.command()
+@cli_error_boundary
 def me() -> None:
     """显示当前登录用户的基本信息"""
-    try:
-        profile = ensure_user_profile()
-    except AuthExpiredError:
-        typer.secho(
-            "未获取到用户信息，请先运行 `sufe auth` 完成登录。",
-            fg=typer.colors.RED,
-            err=True,
-        )
-        raise typer.Exit(1) from None
-
+    profile = ensure_user_profile()
     typer.echo(f"学号: {profile.user_id}")
     typer.echo(f"姓名: {profile.user_name}")
     typer.echo(f"学院: {profile.organization_name}")

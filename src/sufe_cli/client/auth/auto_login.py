@@ -89,7 +89,7 @@ def _locator_natural_size(locator: Locator) -> tuple[int, int] | None:
                 height: img.naturalHeight || 0
             })"""
         )
-    except Exception:
+    except Exception:  # noqa: BLE001
         return None
 
     if not isinstance(natural, dict):
@@ -117,7 +117,7 @@ def _image_size(image: np.ndarray) -> tuple[int, int]:
 def _locator_image_src(locator: Locator) -> str:
     try:
         src = locator.evaluate("img => img.currentSrc || img.src || ''")
-    except Exception:
+    except Exception:  # noqa: BLE001
         return ""
     return src if isinstance(src, str) else ""
 
@@ -149,7 +149,7 @@ def _read_locator_image(locator: Locator) -> _CaptchaImage:
 def _locator_box(locator: Locator) -> FloatRect | None:
     try:
         return locator.bounding_box(timeout=1000)
-    except Exception:
+    except Exception:  # noqa: BLE001
         return None
 
 
@@ -252,7 +252,7 @@ def _wait_for_any(page: Page, *selectors: str, timeout: int = 10000) -> Locator 
             loc = page.locator(sel).first
             loc.wait_for(state="visible", timeout=timeout)
             return loc
-        except Exception:
+        except Exception:  # noqa: BLE001
             continue
     return None
 
@@ -260,7 +260,7 @@ def _wait_for_any(page: Page, *selectors: str, timeout: int = 10000) -> Locator 
 def _wait_for_login_success(page: Page, *, timeout: int = 3500) -> bool:
     try:
         page.wait_for_function("domain => !window.location.href.includes(domain)", arg=LOGIN_DOMAIN, timeout=timeout)
-    except Exception:
+    except Exception:  # noqa: BLE001
         return LOGIN_DOMAIN not in page.url
     return True
 
@@ -282,7 +282,7 @@ def _save_storage_state_with_portal(page, context, storage_state_path: str | Non
             "() => localStorage.getItem('token') !== null && localStorage.getItem('token') !== ''",
             timeout=10000,
         )
-    except Exception:
+    except Exception:  # noqa: BLE001
         pass  # 即使等待失败也继续保存，至少能捕获 cookies
 
     context.storage_state(path=storage_state_path)
@@ -293,7 +293,7 @@ def _safe_click(locator: Locator, *, timeout: int = 1500) -> bool:
         if locator.is_visible():
             locator.click(timeout=timeout)
             return True
-    except Exception:
+    except Exception:  # noqa: BLE001
         return False
     return False
 
@@ -301,7 +301,7 @@ def _safe_click(locator: Locator, *, timeout: int = 1500) -> bool:
 def _is_visible(page: Page, selector: str) -> bool:
     try:
         return page.locator(selector).first.is_visible()
-    except Exception:
+    except Exception:  # noqa: BLE001
         return False
 
 
@@ -316,7 +316,7 @@ def _wait_for_captcha_image_change(page: Page, previous_src: str, *, timeout: in
             arg=[SLIDER_IMG_SELECTOR, previous_src],
             timeout=timeout,
         )
-    except Exception:
+    except Exception:  # noqa: BLE001
         return False
     return True
 
@@ -325,7 +325,7 @@ def _wait_for_captcha_ready(page: Page, *, timeout: int = 8000) -> bool:
     try:
         page.wait_for_selector(SLIDER_IMG_SELECTOR, state="visible", timeout=timeout)
         page.wait_for_selector(SLIDER_MOVE_SELECTOR, state="visible", timeout=timeout)
-    except Exception:
+    except Exception:  # noqa: BLE001
         return False
     return True
 
@@ -343,7 +343,7 @@ def _refresh_captcha(page: Page, login_btn: Locator, previous_src: str) -> bool:
 
     try:
         page.wait_for_selector(f"text={CAPTCHA_TEXT}", state="hidden", timeout=2500)
-    except Exception:
+    except Exception:  # noqa: BLE001
         pass
 
     if not _safe_click(login_btn, timeout=3000):
@@ -351,7 +351,7 @@ def _refresh_captcha(page: Page, login_btn: Locator, previous_src: str) -> bool:
 
     try:
         page.wait_for_selector(f"text={CAPTCHA_TEXT}", state="visible", timeout=10000)
-    except Exception:
+    except Exception:  # noqa: BLE001
         pass
 
     if previous_src and _wait_for_captcha_image_change(page, previous_src, timeout=3500):
@@ -397,7 +397,7 @@ def attempt_login(
                 switch_btn.click()
                 # 等待切换后的账号密码登录标签出现，确认切换成功
                 page.wait_for_selector("text=账号密码登录", timeout=5000)
-            except Exception:
+            except Exception:  # noqa: BLE001
                 # 如果切换按钮不存在，可能默认就是账号密码登录界面
                 pass
 
@@ -419,7 +419,7 @@ def attempt_login(
             # 5. 等待验证码弹窗出现或页面跳转（首轮验证码加载可能需要较长时间）
             try:
                 page.wait_for_selector(f"text={CAPTCHA_TEXT}", timeout=30000)
-            except Exception:
+            except Exception:  # noqa: BLE001
                 # 30 秒内验证码未出现，检查是否已直接跳转成功
                 if LOGIN_DOMAIN not in page.url:
                     _save_storage_state_with_portal(page, context, storage_state_path)
@@ -432,7 +432,7 @@ def attempt_login(
                 try:
                     page.wait_for_selector(SLIDER_IMG_SELECTOR, state="visible", timeout=10000)
                     page.wait_for_selector(SLIDER_MOVE_SELECTOR, state="visible", timeout=5000)
-                except Exception:
+                except Exception:  # noqa: BLE001
                     pass  # 即使超时也继续尝试，后续 is_visible() 会处理
 
                 match: CaptchaMatch | None = None

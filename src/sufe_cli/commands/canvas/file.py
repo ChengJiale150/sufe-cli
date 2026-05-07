@@ -48,7 +48,7 @@ def download_file(
             for chunk in response.iter_content(chunk_size=8192):
                 if chunk:
                     f.write(chunk)
-    except Exception as e:
+    except OSError as e:
         raise UploadFailedError(f"文件保存失败: {e}") from e
 
     typer.secho(f"文件已保存: {save_path}", fg=typer.colors.GREEN)
