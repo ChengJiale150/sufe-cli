@@ -5,7 +5,7 @@ name: Publish to PyPI
 on:
   push:
     tags:
-    - 'v*' # 匹配所有以 v 开头的标签，如 v1.0.0, v1.2.3
+      - 'v*'  # 匹配所有以 'v' 开头的标签，如 v1.0.0, v1.2.3
 
 permissions:
   contents: read
@@ -23,52 +23,50 @@ jobs:
       id-token: write
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.12'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
 
-    - name: Install uv
-      uses: astral-sh/setup-uv@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
 
-    - name: Verify version tag
-      run: |
-        # 提取源码中的版本号
-        VERSION=$(python -c '
-        import re
-        with open("src/sufe_cli/__init__.py", "r") as f:
-            if match := re.search(r"__version__\s*=\s*[\"'\''']([^\"'\''']+)[\"'\''']", f.read()):
-                print(match.group(1))
-            else:
-                raise ValueError("Version not found in __init__.py")
-        ')
-        echo "Package version: $VERSION"
+      - name: Verify version tag
+        run: |
+          # 提取源码中的版本号
+          VERSION=$(python -c '
+          import re
+          with open("src/sufe_cli/__init__.py", "r") as f:
+              if match := re.search(r"__version__\s*=\s*[\"'"'"']([^\"'"'"']+)[\"'"'"']", f.read()):
+                  print(match.group(1))
+              else:
+                  raise ValueError("Version not found in __init__.py")
+          ')
+          echo "Package version: $VERSION"
+          
+          # 从 Git tag 提取目标版本
+          TAG_VERSION=${GITHUB_REF#refs/tags/v}
+          echo "Tag version: $TAG_VERSION"
+          
+          if [ "$VERSION" != "$TAG_VERSION" ]; then
+            echo "Error: Package version ($VERSION) does not match tag version ($TAG_VERSION)"
+            exit 1
+          fi
+          echo "Version verification passed!"
 
-        # 从 Git tag 提取目标版本
-        TAG_VERSION=${GITHUB_REF#refs/tags/v}
-        echo "Tag version: $TAG_VERSION"
+      - name: Build package
+        run: |
+          uv build
+          ls -la dist/
 
-        if [ "$VERSION" != "$TAG_VERSION" ]; then
-          echo "Error: Package version ($VERSION) does not match tag version ($TAG_VERSION)"
-          exit 1
-        fi
-        echo "Version verification passed!"
+      - name: Check package
+        run: uv run --with twine twine check dist/*
 
-    - name: Build package
-      run: |
-        uv build
-        ls -la dist/
-
-    - name: Check package
-      run: uv run --with twine twine check dist/*
-
-    - name: Publish to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        verbose: true
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
 
   # 验证发布成功的任务
   verify-publication:
@@ -76,30 +74,29 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-and-publish
     steps:
-    - name: Install uv
-      uses: astral-sh/setup-uv@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
 
-    - name: Verify and test package from PyPI
-      run: |
-        VERSION=${GITHUB_REF#refs/tags/v}
-
-        echo "Waiting for version $VERSION to propagate on PyPI..."
-
-        # 优雅的轮询等待机制 (最大重试 12 次，每次 10 秒)
-        MAX_RETRIES=12
-        for i in $(seq 1 $MAX_RETRIES); do
-          echo "Attempt $i/$MAX_RETRIES..."
-
-          # 使用 uv tool install 测试全局 CLI 安装，--no-cache 确保拉取 PyPI 最新状态
-          if uv --no-cache tool install --force "sufe-cli==$VERSION"; then
-            echo "Package successfully published and installed!"
-
-            # 简单验证 CLI 连通性
-            sufe --help
-            exit 0
-          fi
-          sleep 10
-        done
-
-        echo "Package not found on PyPI after waiting."
-        exit 1
+      - name: Verify and test package from PyPI
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "Waiting for version $VERSION to propagate on PyPI..."
+          
+          # 优雅的轮询等待机制 (最大重试 12 次，每次 10 秒)
+          MAX_RETRIES=12
+          for i in $(seq 1 $MAX_RETRIES); do
+            echo "Attempt $i/$MAX_RETRIES..."
+            
+            # 使用 uv tool install 测试全局 CLI 安装，--no-cache 确保拉取 PyPI 最新状态
+            if uv --no-cache tool install --force "sufe-cli==$VERSION"; then
+              echo "Package successfully published and installed!"
+              
+              # 简单验证 CLI 连通性
+              sufe --help
+              exit 0
+            fi
+            sleep 10
+          done
+          
+          echo "Package not found on PyPI after waiting."
+          exit 1
