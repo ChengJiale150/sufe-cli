@@ -666,6 +666,7 @@ name = "sufe-cli"
 source = { editable = "." }
 dependencies = [
     { name = "beautifulsoup4" },
+    { name = "click" },
     { name = "opencv-python-headless" },
     { name = "playwright" },
     { name = "pydantic" },
@@ -685,6 +686,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "beautifulsoup4", specifier = ">=4.14.3" },
+    { name = "click", specifier = ">=8.3.3" },
     { name = "opencv-python-headless", specifier = ">=4.13.0.92" },
     { name = "playwright", specifier = ">=1.59.0" },
     { name = "pydantic", specifier = ">=2.12.5" },
